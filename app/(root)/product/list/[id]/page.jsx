@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
+import { getCurrencyIcon } from '@/lib/utils';
 import { SelectTrigger } from '@radix-ui/react-select';
 import { data } from 'autoprefixer';
 import { useParams } from 'next/navigation';
@@ -48,16 +49,33 @@ export default function Page() {
         <div className="flex flex-col gap-6">
           <div>
             <h1 className="text-3xl font-bold">{product?.title}</h1>
-            <p className="text-gray-500 text-lg">Soft and comfortable fleece sweatshirt</p>
+            <p className="text-gray-500 text-lg"> {product?.body_html}</p>
           </div>
           <div className="space-y-2">
-            {data?.body_html}
-            <p className="font-bold text-2xl">$49.99</p>
+
+            <p className="font-bold text-2xl">{getCurrencyIcon(product?.presentment_prices?.price?.currency_code || "")}{product?.price}</p>
           </div>
           <form className="grid gap-4 md:gap-10">
             {product?.options?.map(d => <div key={d?.name} className="grid gap-2">
               <Label className="text-base" htmlFor="color">
                 {d?.name}
+              </Label>
+              <div className="flex">
+                {d?.values?.map(d => <Label key={d}
+                  className="border cursor-pointer rounded-md p-2 flex items-center gap-2 [&:has(:checked)]:bg-gray-100 dark:[&:has(:checked)]:bg-gray-800"
+                  htmlFor="color-black"
+                >
+                  {d}
+                </Label>)}
+              </div>
+            </div>
+            )}
+
+          </form>
+          <form className="grid gap-4 md:gap-10">
+            {product?.variants?.map(d => <div key={d?.id} className="grid gap-2">
+              <Label className="text-base" htmlFor="color">
+                {d?.price}
               </Label>
               <div className="flex">
                 {d?.values?.map(d => <Label key={d}

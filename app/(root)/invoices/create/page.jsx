@@ -21,6 +21,7 @@ export default function CreateInvoice() {
     const [invoiceOrderDetails, setInvoiceDetails] = useState({});
     const [invoiceId, setInvoiceId] = useState("")
     const [dueDate, setDueDate] = useState("")
+    const [invoiceTotal, setInvoiceTotal] = useState("")
     const [sendTo, setSendTo] = useState("")
     const [note, setNote] = useState("")
     useEffect(() => {
@@ -59,9 +60,9 @@ export default function CreateInvoice() {
             order_number: order.order_id,
             due_date: dueDate,
             note: note,
-            total_price: invoiceOrderDetails.total_price,
+            total_price: invoiceTotal,
             status: "pending",
-            sent_to:sendTo
+            sent_to: sendTo
         })
         if (sendTo === "dropshipper") {
             const { data, error } = await supabase.from("dropshipper_invoices").insert({
@@ -153,6 +154,16 @@ export default function CreateInvoice() {
                             onChange={(e) => setDueDate(e.target.value)}
                             placeholder="Enter invoice date"
                             type="date"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="invoiceTotal">Invoice Total</Label>
+                        <Input
+                            id="invoiceTotal"
+                            value={invoiceTotal}
+                            onChange={(e) => setInvoiceTotal(e.target.value)}
+                            placeholder="Enter invoice date"
+                            type="number"
                         />
                     </div>
                 </div>

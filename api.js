@@ -1,12 +1,15 @@
 import { createClient } from '@supabase/supabase-js'
-const base = "https://x-com-server.onrender.com"
+const base = "http://localhost:8000"
 export const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
 
 export async function getStoreFrontKeys() {
-    const { data } = await supabase.from("shop").select();
+    const user = JSON.parse(localStorage.getItem("user"))
+    console.log(user)
+    const { data } = await supabase.from("shop").select().eq("user_id",user.user_id);
+
     return {
         API_KEY: data[0].api_key,
         SHOP_URL: data[0].shop_domain,

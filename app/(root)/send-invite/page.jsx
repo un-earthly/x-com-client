@@ -12,7 +12,7 @@ export default function SendInvitations() {
 
     const handleSendInvitations = async () => {
         try {
-            const response = await axios.post('https://x-com-server.onrender.com/send-invitation', {
+            const response = await axios.post('http://localhost:8000/send-invitation', {
                 recipientEmail: emails,
             });
             toast.success("Sent!")
