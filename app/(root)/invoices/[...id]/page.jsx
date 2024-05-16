@@ -14,51 +14,22 @@ export default function Invoice() {
         async function loadDataAndConvertToJson() {
             try {
                 // Load invoice data from the invoices table
-                const { data: invoices } = await supabase.from("invoices").select();
+                const { data: invoices } = await supabase
+                    .from("invoices")
+                    .select()
+                    .eq("invoice_number", id[0]);
+
                 console.log(invoices)
-                // Load customer data from the customers table
-                const { data: customers } = await supabase.from("customers").select();
-
-                // Load item data from the items table
-                const { data: items } = await supabase.from("items").select();
-
-                // Load invoice-item mapping data from the invoice_items table
-                const { data: invoiceItems } = await supabase.from("invoice_items").select();
-
-
-                // Iterate through each invoice
-                invoices.forEach(invoice => {
-                    // Find the corresponding customer
-                    const customer = customers.find(c => c.id === invoice.customer_id);
-
-                    // Find items associated with the current invoice
-                    const invoiceItemsData = invoiceItems.filter(item => item.invoice_id === invoice.invoice_number);
-                    const formattedItems = invoiceItemsData.map(item => {
-                        const { description, quantity, price, tax } = items.find(i => i.id === item.item_id);
-                        return { description, quantity, price, tax };
-                    });
-
-                    // Build the JSON object for the current invoice
-                    const invoiceObject = {
-                        invoice_number: invoice.invoice_number,
-                        invoice_date: invoice.invoice_date,
-                        id: invoice.id,
-                        customer: {
-                            id: customer.id,
-                            name: customer.name,
-                            address_line1: customer.address_line1,
-                            address_line2: customer.address_line2,
-                            address_line3: customer.address_line3,
-                            email: customer.email,
-                            phone: customer.phone
-                        },
-                        items: formattedItems,
-                        note: invoice.note,
-                        invoice_total: invoice.invoice_total
-                    };
-
-                    setInvoiceData(invoiceObject)
-                });
+                if (invoices[0].sent_to === "dropshipper") {
+                    const { data: dropshipperInvoiceDetails, error } = await supabase.from("dropshipper_invoices").select(
+                        `*,
+                        user{
+                            *
+                        }`
+                    )
+                    console.log(dropshipperInvoiceDetails, error)
+                }
+                setInvoiceData(invoices[0])
             } catch (error) {
                 console.error("An error occurred while loading and converting data:", error.message);
                 return null;

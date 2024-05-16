@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from '../ui/button'
 import { MoreHorizontal } from 'lucide-react'
 import { supabase } from '@/api'
+import toast from 'react-hot-toast'
 
 export default function DropShipperQuoteList() {
     const [quoteData, setQuoteData] = useState([])
@@ -38,7 +39,9 @@ export default function DropShipperQuoteList() {
                     order_id: data[0].order_id
                 }).select()
             console.log(supplierOrderData, supplierOrderError)
-
+            if (!error) {
+                toast.success("accepted")
+            }
             // console.log('Data updated successfully with status accepted:', data);
         } catch (error) {
             console.error('Error updating data:', error.message);
@@ -68,7 +71,11 @@ export default function DropShipperQuoteList() {
 
                 let { data: supplier_offer, error } = await supabase
                     .from('supplier_offer')
-                    .select('*')
+                    .select(`*,
+                        quotes (
+                            *
+                        )
+                    `).neq("status", "accepted")
 
 
                 console.log(supplier_offer)
@@ -92,25 +99,27 @@ export default function DropShipperQuoteList() {
                     <TableHead>Supplier</TableHead>
                     <TableHead>Estimated Delivery Date</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Total</TableHead>
+                    <TableHead>Order Total</TableHead>
+                    <TableHead>Supplier Offer</TableHead>
                     <TableHead>Actions</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
                 {quoteData?.length > 0 ? quoteData.map((d) => <TableRow key={d?.id}>
                     <TableCell>#{d?.id}</TableCell>
-                    <TableCell>#{d?.order_number}</TableCell>
+                    <TableCell>#{d?.quotes?.order_number}</TableCell>
                     <TableCell>{d?.supplier_name}</TableCell>
                     <TableCell>{d?.estimated_delivery}</TableCell>
                     <TableCell>{d?.status}</TableCell>
-                    <TableCell>${d?.supplier_offer}</TableCell>
+                    <TableCell>€ {d?.quotes?.amount}</TableCell>
+                    <TableCell>€ {d?.supplier_offer}</TableCell>
                     <TableCell>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost"><MoreHorizontal /></Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                <DropdownMenuItem>View details</DropdownMenuItem>
+                                {/* <DropdownMenuItem>View details</DropdownMenuItem> */}
                                 <DropdownMenuItem><div onClick={() => handleAcceptQuotion(d.quote_id)}>Accept Quote</div></DropdownMenuItem>
                                 <DropdownMenuItem><div onClick={() => handleRejectQuotion(d.quote_id)} >Reject Quote</div></DropdownMenuItem>
                             </DropdownMenuContent>

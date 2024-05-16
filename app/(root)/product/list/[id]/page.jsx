@@ -2,17 +2,14 @@
 import { fetchProductDetails } from '@/api';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 import { getCurrencyIcon } from '@/lib/utils';
-import { SelectTrigger } from '@radix-ui/react-select';
-import { data } from 'autoprefixer';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
 
 export default function Page() {
   const { id } = useParams();
-  const [product, setProduct] = useState({})
+  const [product, setProduct] = useState({});
+  const [imgSrc, setImgSrc] = useState("")
   useEffect(() => {
     async function handleGetDetails() {
 
@@ -30,7 +27,7 @@ export default function Page() {
             alt="Product Image"
             className="aspect-square object-cover border border-gray-200 w-full rounded-lg overflow-hidden dark:border-gray-800"
             height={600}
-            src={product?.image?.src}
+            src={imgSrc || product?.image?.src}
             width={600}
           />
           <div className="hidden md:flex gap-4 items-start">
@@ -40,16 +37,17 @@ export default function Page() {
                 className="aspect-square object-cover"
                 height={100}
                 src={d?.src}
+                onClick={() => setImgSrc(d?.src)}
                 width={100}
               />
               <span className="sr-only">View Image 1</span>
             </button>)}
           </div>
+
         </div>
         <div className="flex flex-col gap-6">
           <div>
             <h1 className="text-3xl font-bold">{product?.title}</h1>
-            <p className="text-gray-500 text-lg"> {product?.body_html}</p>
           </div>
           <div className="space-y-2">
 
@@ -72,7 +70,10 @@ export default function Page() {
             )}
 
           </form>
-          <form className="grid gap-4 md:gap-10">
+          <Button>
+            Up for quote
+          </Button>
+          {/* <form className="grid gap-4 md:gap-10">
             {product?.variants?.map(d => <div key={d?.id} className="grid gap-2">
               <Label className="text-base" htmlFor="color">
                 {d?.price}
@@ -88,8 +89,10 @@ export default function Page() {
             </div>
             )}
 
-          </form>
+          </form> */}
         </div>
+        <div dangerouslySetInnerHTML={{ __html: product?.body_html }} />
+
 
       </div>
     </div>

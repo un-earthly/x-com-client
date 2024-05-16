@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DropdownMenuTrigger, DropdownMenuItem, DropdownMenuContent, DropdownMenu } from "@/components/ui/dropdown-menu"
 import { ROLE_SUPPLIER, ROLE_USER } from "@/lib/constant"
 import { useEffect, useState } from "react"
+import toast from "react-hot-toast"
 
 export default function AssignStore() {
     const [shops, setShops] = useState([]);
@@ -30,6 +31,9 @@ export default function AssignStore() {
             supplier_id: supplier_id
         }).select()
         console.log(data, error)
+        if (!error) {
+            toast.success("Successfully assigned supplier")
+        }
     }
     return (
         <Card>

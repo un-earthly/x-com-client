@@ -10,7 +10,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowDown, ArrowUpDown, ChevronDown, Delete, DeleteIcon, Eye, MoreHorizontal, PlusCircle, Trash } from "lucide-react"
+import { ArrowDown, ArrowUpDown, ChevronDown, Delete, DeleteIcon, Eye, EyeIcon, MoreHorizontal, PlusCircle, Trash } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -23,7 +23,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
 import {
   Table,
   TableBody,
@@ -41,34 +40,36 @@ import { ROLE_ADMIN, ROLE_SUPPLIER, ROLE_USER } from "@/lib/constant"
 
 export default function DataTableDemo() {
   const [editStatus, setEditState] = React.useState(false);
-  const [status, setStatus] = React.useState("Status")
+  const [status, setStatus] = React.useState("")
   const [role, setRole] = React.useState("");
   React.useEffect(() => {
     const data = JSON.parse(localStorage.getItem("user"))?.role;
     setRole(data)
   }, [])
   const handleStatusUpdate = async (status, id) => {
-
-    const { data: updatedStatus, error } = await supabase.from("invoices")
+    console.log(id)
+    const { data: updatedStatus, error } = await supabase.from("")
       .update({ status }).eq("invoice_number", id).select("status");
     console.log(error)
     setStatus(status);
     setEditState(false);
+    if (!error) {
 
-    setData(prevData => {
-      // Find the index of the row with the matching invoice_id
-      const rowIndex = prevData.findIndex(row => row.invoice_number === id);
-      if (rowIndex !== -1) {
-        // Create a new array with the updated status for the row
-        const newData = [...prevData];
-        newData[rowIndex] = { ...newData[rowIndex], status: updatedStatus[0].status };
-        return newData;
-      }
-      return prevData;
-    });
+      setData(prevData => {
+        // Find the index of the row with the matching invoice_id
+        const rowIndex = prevData.findIndex(row => row.invoice_number === id);
+        if (rowIndex !== -1) {
+          // Create a new array with the updated status for the row
+          const newData = [...prevData];
+          newData[rowIndex] = { ...newData[rowIndex], status: updatedStatus[0].status };
+          return newData;
+        }
+        return prevData;
+      });
+      toast.success("Successfully updated status")
+    }
     console.log(data, updatedStatus)
 
-    toast.success("Successfully updated status")
   }
   const handleDeleteInvoice = async (id) => {
     try {
@@ -183,10 +184,11 @@ export default function DataTableDemo() {
             </TableHeader>
             <TableBody>
               {data.length > 0 ? data.map(d => <TableRow key={d.invoice_number}>
-                {role === ROLE_ADMIN ? <> <TableCell
-                >
-                  # {d.invoice_number}
-                </TableCell>
+                {role === ROLE_ADMIN ? <>
+                  <TableCell
+                  >
+                    # {d.invoice_number}
+                  </TableCell>
                   <TableCell
                     className="capitalize"
                   >
@@ -259,7 +261,45 @@ export default function DataTableDemo() {
                   </TableCell>
                   <TableCell
                   >
-                    {d.status}
+                    {editStatus ? <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="p-0">
+                          <span className="capitalize flex items-center space-x-2">{d.status}<ChevronDown className="h-4 w-4" /></span>
+
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>{status}</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem><div onClick={() => handleStatusUpdate("send", d.invoices.invoice_number)}>Send</div></DropdownMenuItem>
+                        <DropdownMenuItem><div onClick={() => handleStatusUpdate("in progress", d.invoices.invoice_number)}>In Progress</div></DropdownMenuItem>
+                        <DropdownMenuItem><div onClick={() => handleStatusUpdate("verifying", d.invoices.invoice_number)}>Verifying</div></DropdownMenuItem>
+                        <DropdownMenuItem><div onClick={() => handleStatusUpdate("unpaid", d.invoices.invoice_number)}>Unpaid</div></DropdownMenuItem>
+                        <DropdownMenuItem><div onClick={() => handleStatusUpdate("paid", d.invoices.invoice_number)}>Paid</div></DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu> : <div className="capitalize">{d?.status}</div>}
+                  </TableCell>
+                  <TableCell
+                  >
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                            <DropdownMenuItem><Link href={`/invoices/${d.invoices.invoice_number}/view`}>View invoice details</Link></DropdownMenuItem>
+                          <DropdownMenuItem > <div onClick={() => setEditState(true)}>Update Status</div></DropdownMenuItem>
+                          {role === ROLE_ADMIN && <>
+                            <DropdownMenuItem>
+                                <div onClick={() => handleDeleteInvoice(d.invoices.invoice_number)}>Delete invoice</div></DropdownMenuItem>
+                          </>}</DropdownMenuContent>
+                      </DropdownMenu >
+                    </TableCell>
                   </TableCell>
 
                 </>}

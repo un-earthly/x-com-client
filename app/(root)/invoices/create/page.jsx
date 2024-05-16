@@ -5,17 +5,15 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useEffect, useState } from "react"
-import { generateTotal, getCurrencyIcon } from "@/lib/utils"
+import {  getCurrencyIcon } from "@/lib/utils"
 import { fetchOrderDetails, fetchOrders, supabase } from "@/api"
 import toast from "react-hot-toast"
 import { ChevronDownIcon, InboxIcon, PlusCircle, Trash } from "lucide-react"
-import { useRouter } from "next/navigation"
 
 import { DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem, DropdownMenuGroup, DropdownMenuContent, DropdownMenu } from "@/components/ui/dropdown-menu"
 
 
 export default function CreateInvoice() {
-    const router = useRouter()
     const [orders, setOrders] = useState([]);
     const [order, setOrder] = useState("");
     const [invoiceOrderDetails, setInvoiceDetails] = useState({});

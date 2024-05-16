@@ -34,12 +34,20 @@ export default function QuotePrice() {
     }
     useEffect(() => {
         // console.log(params)
-        async function handlefetchOrderDetails() {
-            const { order } = await fetchOrderDetails(id);
+        (async function () {
+            const { data, error } = await supabase
+                .from("assigned_shop")
+                .select(`*, user(*), shop(*)`)
+                .eq("supplier_id", user.user_id)
+            console.log(data, error)
+            const { order } = await fetchOrderDetails(id, {
+                API_KEY: data[0].api_key,
+                SHOP_URL: data[0].shop_domain,
+                PASSWORD: data[0].api_access
+            });
             console.log(order)
             setOrderData(order)
-        }
-        handlefetchOrderDetails();
+        })()
     }, [])
     return (<section className="">
         <div className="container px-4 md:px-6">
