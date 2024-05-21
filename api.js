@@ -91,7 +91,7 @@ export const fetchOrders = async (headers) => {
         if (!headers) {
             headers = await getStoreFrontKeys();
         }
-
+        console.log(headers)
         const response = await fetch(`${base}/orders`, {
             headers
         });

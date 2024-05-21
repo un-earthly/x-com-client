@@ -123,9 +123,9 @@ export default function Orders() {
         setUser(JSON.parse(localStorage.getItem("user")))
         async function fetchData() {
             try {
-                const data = await fetchOrders();
-                console.log(data.orders)
-                setData(data.orders);
+                const { orders } = await fetchOrders();
+                console.log(orders)
+                setData(orders);
             } catch (error) {
                 console.error("Error fetching orders:", error);
             }

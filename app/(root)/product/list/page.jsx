@@ -9,10 +9,20 @@ import { MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 export default function ProdctList() {
     const [data, setData] = useState([]);
-
+    const [shop, setShop] = useState({})
     useEffect(() => {
+        const user = JSON.parse(localStorage.getItem("user"))
         async function fetchShopifyData() {
-            const products = await fetchProducts()
+            const { data, error } = await supabase
+                .from("shop")
+                .select()
+                .eq("user_id", user.user_id)
+            setShop(data[0])
+            const products = await fetchProducts({
+                API_KEY: data[0].api_key,
+                SHOP_URL: data[0].shop_domain,
+                PASSWORD: data[0].api_access
+            })
             setData(products.products)
             console.log(products.products)
         }
@@ -26,7 +36,8 @@ export default function ProdctList() {
             .insert({
                 amount: data.variants[0].price,
                 dropshipper_id: user.id,
-                product_id: data.id
+                product_id: data.id,
+                shop_id: shop.id
             }).select();
 
         if (error) {

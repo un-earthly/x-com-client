@@ -135,7 +135,7 @@ export default function SupplierQuoteListing() {
 
                                 <TableCell>
                                     <div className="flex items-center justify-center">
-                                        <Link href={{ pathname: `quotation/quote-price/${d?.product_id}`, query: { quote_id: d.quote_id, supplier_id: user.user_id } }}>  <Button>Details</Button></Link>
+                                        <Link href={{ pathname: `quotation/quote-price/product/${d?.product_id}`, query: { quote_id: d.quote_id, supplier_id: user.user_id } }}>  <Button>Details</Button></Link>
                                     </div>
                                 </TableCell>
                             </TableRow>) : (
