@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { ROLE_SUPPLIER, ROLE_USER } from './lib/constant';
 
-const base = "http://localhost:8000";
+const base = "https://x-com-server.onrender.com";
 export const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
