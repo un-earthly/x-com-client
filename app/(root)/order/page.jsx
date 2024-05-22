@@ -34,59 +34,6 @@ import { MoreHorizontal } from "lucide-react"
 import { fetchOrders } from '@/api.js'
 import { getCurrencyIcon } from "@/lib/utils"
 import toast from "react-hot-toast"
-export const columns = [
-
-
-    {
-        accessorKey: "order_number",
-        header: "Order ID",
-        cell: ({ row }) => (
-            <div className="capitalize">#{row.getValue("order_number")}</div>
-        ),
-    },
-
-    {
-        accessorKey: "current_total_price",
-        header: () => <div >Amount</div>,
-        cell: ({ row }) => {
-            const amount = parseFloat(row.getValue("current_total_price"))
-
-            const formatted = new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: row.getValue("currency") || "USD",
-            }).format(amount)
-
-            return <div className=" font-medium">{formatted}</div>
-        },
-    },
-    {
-        accessorKey: "issue_date",
-        header: "Issue Date",
-        cell: ({ row }) => (
-            <div className="capitalize">{row.getValue("issue_date")}</div>
-        ),
-    },
-    {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => (
-            <div className="capitalize">{row.getValue("status")}</div>
-        ),
-    },
-
-
-    {
-        id: "actions",
-        header: "Actions",
-        enableHiding: false,
-        cell: ({ row }) => {
-
-            return (
-                <></>
-            )
-        },
-    },
-]
 export default function Orders() {
 
     const [data, setData] = React.useState([]);
@@ -120,10 +67,21 @@ export default function Orders() {
 
 
     React.useEffect(() => {
-        setUser(JSON.parse(localStorage.getItem("user")))
+        const user = JSON.parse(localStorage.getItem("user"))
+        setUser(user)
+
         async function fetchData() {
             try {
-                const { orders } = await fetchOrders();
+                const { data, error } = await supabase
+                    .from("shop")
+                    .select()
+                    .eq("user_id", user.user_id)
+                console.log(data, error)
+                const { orders } = await fetchOrders({
+                    API_KEY: data[0].api_key,
+                    SHOP_URL: data[0].shop_domain,
+                    PASSWORD: data[0].api_access
+                });
                 console.log(orders)
                 setData(orders);
             } catch (error) {

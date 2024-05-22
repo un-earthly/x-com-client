@@ -73,7 +73,7 @@ export default function SupplierQuoteListing() {
 
     return (
         <div>
-            <Tabs className="w-full max-w-4xl" defaultValue="table1">
+            <Tabs className="w-full" defaultValue="table1">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="table1">Quotes On Order</TabsTrigger>
                     <TabsTrigger onClick={() => fetchProductQuoteData()} value="table2">Quotes On Product</TabsTrigger>

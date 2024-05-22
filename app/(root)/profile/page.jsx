@@ -61,11 +61,17 @@ export default function Profile() {
   useEffect(() => {
 
     async function handleProfileDataFetch() {
-      const user = await supabase.auth.getUser()
+      const { data: { session }, error: userError } = await supabase.auth.getSession()
+      console.log(userError)
+      if (!session) {
+        localStorage.removeItem('user')
+        window.location.href = "/login"
+        return
+      }
       const { data, error } = await supabase
         .from('user')
         .select()
-        .eq('user_id', user.data.user.id);
+        .eq('user_id', session.user.id);
       console.log(data[0])
       setProfileData(data[0])
     }
