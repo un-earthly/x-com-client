@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { ROLE_SUPPLIER, ROLE_USER } from './lib/constant';
 
-const base = "https://x-com-server.onrender.com";
+// const base = "https://x-com-server.onrender.com";
+const base = "http://localhost:8000";
 export const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -109,9 +110,6 @@ export const fetchOrders = async (headers) => {
 
 export const fetchOrderDetails = async (id, headers) => {
     try {
-        if (!headers) {
-            headers = await getStoreFrontKeys();
-        }
 
         const response = await fetch(`${base}/order/${id}`, {
             headers

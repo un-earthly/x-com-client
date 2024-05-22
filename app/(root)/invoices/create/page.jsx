@@ -5,17 +5,20 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useEffect, useState } from "react"
-import {  getCurrencyIcon } from "@/lib/utils"
-import { fetchOrderDetails, fetchOrders, supabase } from "@/api"
+import { getCurrencyIcon } from "@/lib/utils"
+import { fetchOrderDetails, fetchOrders, fetchProductDetails, supabase } from "@/api"
 import toast from "react-hot-toast"
 import { ChevronDownIcon, InboxIcon, PlusCircle, Trash } from "lucide-react"
 
 import { DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem, DropdownMenuGroup, DropdownMenuContent, DropdownMenu } from "@/components/ui/dropdown-menu"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 
 export default function CreateInvoice() {
     const [orders, setOrders] = useState([]);
     const [order, setOrder] = useState("");
+    const [products, setProducts] = useState([]);
+    const [product, setProduct] = useState([]);
     const [invoiceOrderDetails, setInvoiceDetails] = useState({});
     const [invoiceId, setInvoiceId] = useState("")
     const [dueDate, setDueDate] = useState("")
@@ -24,28 +27,45 @@ export default function CreateInvoice() {
     const [note, setNote] = useState("")
     useEffect(() => {
         async function fetchData() {
-            const { data: orders } = await supabase.from("supplier_order").select();
-            console.log(orders)
+            const { data: orders } = await supabase.from("supplier_order").select(`*,quotes(*,shop(*))`);
+            const { data: products } = await supabase.from("supplier_order_product").select(`*,product_quotes(*,shop(*))`);
             setOrders(orders);
-
+            setProducts(products);
         }
 
         fetchData()
 
     }, [])
 
-    useEffect(() => {
-        async function handlefetchOrderDetails() {
-            if (order.order_id) {
-                const { order: orderData } = await fetchOrderDetails(order.order_id)
-                console.log(orderData)
-                setInvoiceDetails(orderData)
-            }
+    // useEffect(() => {
 
-        }
-        handlefetchOrderDetails()
-    }, [order.order_id])
+    //     handlefetchOrderDetails()
+    // }, [order?.order_id||product?.product_id])
     // Function to generate a random invoice number
+    async function handlefetchOrderDetails() {
+        if (order.order_id) {
+            const { order: orderData } = await fetchOrderDetails(order.order_id, {
+                API_KEY: order.quotes.shop.api_key,
+                SHOP_URL: order.quotes.shop.shop_domain,
+                PASSWORD: order.quotes.shop.api_access
+            })
+            console.log(orderData)
+            setInvoiceDetails(orderData)
+        }
+
+    }
+    async function handlefetchProductDetails(id) {
+        // if (product.product_id) {
+        const { order: orderData } = await fetchProductDetails(id, {
+            API_KEY: product.product_quotes.shop.api_key,
+            SHOP_URL: product.product_quotes.shop.shop_domain,
+            PASSWORD: product.product_quotes.shop.api_access
+        })
+        console.log(orderData)
+        // setInvoiceDetails(orderData)
+        // }
+
+    }
     function generateInvoiceId() {
         const min = 100000; // Minimum 6-digit number
         const max = 999999; // Maximum 6-digit number
@@ -60,13 +80,14 @@ export default function CreateInvoice() {
             note: note,
             total_price: invoiceTotal,
             status: "pending",
-            sent_to: sendTo
+            sent_to: sendTo,
         })
         if (sendTo === "dropshipper") {
             const { data, error } = await supabase.from("dropshipper_invoices").insert({
                 invoice_id: invoiceId,
                 dropshipper_id: order.dropshipper_id,
-                status: "unpaid", received_date: new Date()
+                status: "unpaid",
+                received_date: new Date()
             }).select()
             console.log(data, error)
         }
@@ -91,23 +112,37 @@ export default function CreateInvoice() {
                         <CardDescription>Enter invoice information to create.</CardDescription>
 
                     </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger className="flex items-center gap-2">
+                            <Button variant="ghost">
+                                {order ? (
+                                    `# ${order.order_number}`
+                                ) : product ? (
+                                    `${product.product_id}`
+                                ) : (
+                                    "Select Order or Product Number"
+                                )}
+                            </Button>
+                            <ChevronDownIcon className="h-4 w-4" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <Tabs className="border-b" defaultValue="profile">
+                                <TabsList className="flex border-b">
+                                    <TabsTrigger value="profile">Order</TabsTrigger>
+                                    <TabsTrigger value="security">Product</TabsTrigger>
+                                </TabsList>
+                                <TabsContent value="profile">
+                                    {orders?.map(o => <DropdownMenuItem onClick={() => { setProduct(null); setOrder(o); handlefetchOrderDetails(o.order_number) }} key={o?.order_number}>#{o.order_number}</DropdownMenuItem>)}
+                                </TabsContent>
+                                <TabsContent value="security">
+                                    {products?.map(o => <DropdownMenuItem onClick={() => { setProduct(o); setOrder(null); handlefetchProductDetails(o.product_id) }} key={o?.product_id}>{o.product_id}</DropdownMenuItem>)}
+                                </TabsContent>
+
+                            </Tabs>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                     {orders?.length > 0 && <div className="flex space-x-3">
-                        <DropdownMenu >
-                            <DropdownMenuTrigger className="flex items-center gap-2">
-                                <Button variant="ghost" >{order ? `# ${order.order_number}` : "Select Order Number"}</Button>
-                                <ChevronDownIcon className="h-4 w-4" />
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent >
-                                <div className="mb-2">
-                                    <Input className="w-full" placeholder="Search orders..." type="search" />
-                                </div>
-                                <DropdownMenuLabel>Order Numbers</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuGroup>
-                                    {orders?.map(o => <DropdownMenuItem onClick={() => setOrder(o)} key={o?.order_number}>#{o.order_number}</DropdownMenuItem>)}
-                                </DropdownMenuGroup>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+
                         {order?.order_number && <DropdownMenu >
                             <DropdownMenuTrigger className="flex items-center gap-2">
                                 <Button variant="ghost" className="capitalize" >{sendTo ? sendTo : "Send to"}</Button>
@@ -160,7 +195,7 @@ export default function CreateInvoice() {
                             id="invoiceTotal"
                             value={invoiceTotal}
                             onChange={(e) => setInvoiceTotal(e.target.value)}
-                            placeholder="Enter invoice date"
+                            placeholder="Enter Amount"
                             type="number"
                         />
                     </div>

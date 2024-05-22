@@ -4,7 +4,7 @@ import { CardTitle, CardDescription, CardHeader, CardContent, CardFooter, Card }
 import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useParams } from 'next/navigation';
-import { supabase } from '@/api';
+import { fetchOrderDetails, supabase } from '@/api';
 import Link from 'next/link';
 
 export default function Invoice() {
@@ -13,22 +13,16 @@ export default function Invoice() {
     useEffect(() => {
         async function loadDataAndConvertToJson() {
             try {
+
                 // Load invoice data from the invoices table
-                const { data: invoices } = await supabase
+                const { data: invoices, error } = await supabase
                     .from("invoices")
-                    .select()
+                    .select(`*, user(*)`)
                     .eq("invoice_number", id[0]);
 
-                console.log(invoices)
-                if (invoices[0].sent_to === "dropshipper") {
-                    const { data: dropshipperInvoiceDetails, error } = await supabase.from("dropshipper_invoices").select(
-                        `*,
-                        user{
-                            *
-                        }`
-                    )
-                    console.log(dropshipperInvoiceDetails, error)
-                }
+                console.log(invoices, error)
+                
+                fetchOrderDetails()
                 setInvoiceData(invoices[0])
             } catch (error) {
                 console.error("An error occurred while loading and converting data:", error.message);

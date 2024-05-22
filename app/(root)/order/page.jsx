@@ -38,10 +38,28 @@ export default function Orders() {
 
     const [data, setData] = React.useState([]);
     const [user, setUser] = React.useState("")
-
+    const [shop, setShop] = React.useState("");
 
     const handleUpForQuote = async (id, order_number, amount) => {
         try {
+            // Fetch the shop data for the current user
+            // const { data: shopData, error: shopErr } = await supabase
+            //     .from("shop")
+            //     .select()
+            //     .eq("user_id", user.user_id);
+
+            // if (shopErr) {
+            //     console.error('Error fetching shop data:', shopErr.message);
+            //     toast.error("Error fetching shop data");
+            //     return;
+            // }
+
+            // if (!shopData || shopData.length === 0) {
+            //     console.error('No shop data found for the user');
+            //     toast.error("No shop data found");
+            //     return;
+            // }
+
             // Insert data into the Supabase table
             const { data, error } = await supabase
                 .from('quotes')
@@ -50,20 +68,25 @@ export default function Orders() {
                     status: "up_for_quote",
                     dropshipper_id: user.id,
                     order_number,
-                    amount
+                    amount,
+                    shop_id: shop.id
                 })
                 .select();
+
             if (error) {
-                console.log(error)
-                toast.error("Already exists")
-                throw error;
+                console.error('Error inserting quote data:', error.message);
+                toast.error("Error inserting quote data");
+                return;
             }
-            toast.success("Success")
+
+            toast.success("Quote successfully created");
             console.log('Data inserted successfully with status up_for_quote:', data);
         } catch (error) {
-            console.error('Error inserting data:', error.message);
+            console.error('Unexpected error:', error.message);
+            toast.error("Unexpected error occurred");
         }
     };
+
 
 
     React.useEffect(() => {
@@ -77,6 +100,7 @@ export default function Orders() {
                     .select()
                     .eq("user_id", user.user_id)
                 console.log(data, error)
+                setShop(data[0])
                 const { orders } = await fetchOrders({
                     API_KEY: data[0].api_key,
                     SHOP_URL: data[0].shop_domain,

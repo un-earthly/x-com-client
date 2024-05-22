@@ -30,7 +30,7 @@ export default function DropShipperQuoteList() {
             }
             console.log(data[0])
             // Update the supplier_offer table
-            const {data:supplierOffer, error: offerError } = await supabase
+            const { data: supplierOffer, error: offerError } = await supabase
                 .from(supplierOfferTable)
                 .update({ status: 'accepted' })
                 .eq('quote_id', quoteId)
@@ -65,7 +65,11 @@ export default function DropShipperQuoteList() {
             if (supplierOrderError) {
                 throw supplierOrderError;
             }
-
+            setQuoteData(prev =>
+                prev.map(d =>
+                    d.id === quoteId ? { ...d, status: "accepted" } : d
+                )
+            );
             toast.success("Accepted");
             console.log(supplierOrderData);
         } catch (error) {

@@ -66,7 +66,7 @@ export default function Layout({ children }) {
                                 <ShoppingCart className="h-4 w-4" />
                                 Orders
                             </Link>}
-                            {userRole !== ROLE_SUPPLIER && <Link
+                            {userRole === ROLE_USER && <Link
                                 href="/product/list"
                                 className={`flex items-center gap-3 rounded-lg ${activeLink === '/product/list' ? 'text-primary' : 'text-muted-foreground'} px-3 py-2 transition-all hover:text-primary`}
                                 onClick={() => handleLinkClick('/product/list')}

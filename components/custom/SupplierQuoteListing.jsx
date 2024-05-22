@@ -17,13 +17,15 @@ export default function SupplierQuoteListing() {
     const fetchQuoteData = async () => {
         try {
             // Fetch quotes data
-            const { data, error } = await supabase.from('quotes').select(`*,user(*)`);
+            const { data, error } = await supabase.from('quotes')
+                .select(`*,user(*),shop(*)`);
             if (error) {
                 throw error;
             }
 
             // Fetch existing offers data
-            const { data: existingOffers, error: existingOffersError } = await supabase.from('supplier_offer').select('quote_id');
+            const { data: existingOffers, error: existingOffersError } = await supabase
+                .from('supplier_offer').select('quote_id');
             if (existingOffersError) {
                 throw existingOffersError;
             }
@@ -44,14 +46,16 @@ export default function SupplierQuoteListing() {
     const fetchProductQuoteData = async () => {
         try {
             // Fetch quotes data
-            const { data, error } = await supabase.from('product_quotes').select(`*,user(*),shop(*)`);
+            const { data, error } = await supabase.from('product_quotes')
+                .select(`*,user(*),shop(*)`);
             console.log(data)
             if (error) {
                 throw error;
             }
 
             // Fetch existing offers data
-            const { data: existingOffers, error: existingOffersError } = await supabase.from('supplier_offer').select('quote_id');
+            const { data: existingOffers, error: existingOffersError } = await supabase
+                .from('supplier_offer_product').select('quote_id');
             if (existingOffersError) {
                 throw existingOffersError;
             }
@@ -85,7 +89,7 @@ export default function SupplierQuoteListing() {
                                 <TableHead>Quotation ID</TableHead>
                                 <TableHead>Order ID</TableHead>
                                 <TableHead>Total Amount</TableHead>
-                                <TableHead>Dropshipper</TableHead>
+                                <TableHead>Shop Name</TableHead>
                                 <TableHead><div className="text-center">Actions</div></TableHead>
                             </TableRow>
                         </TableHeader>
@@ -94,7 +98,7 @@ export default function SupplierQuoteListing() {
                                 <TableCell>#{d?.quote_id}</TableCell>
                                 <TableCell>#{d?.order_number}</TableCell>
                                 <TableCell>${d?.amount}</TableCell>
-                                <TableCell>{d?.user?.user_name}</TableCell>
+                                <TableCell>{d?.shop?.shop_name}</TableCell>
 
                                 <TableCell>
                                     <div className="flex items-center justify-center">

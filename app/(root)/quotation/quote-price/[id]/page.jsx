@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { SelectValue, SelectTrigger, SelectItem, SelectContent, Select } from "@/components/ui/select"
 
 import { RadioGroupItem, RadioGroup } from "@/components/ui/radio-group"
+import toast from 'react-hot-toast'
 
 export default function QuotePrice() {
     const router = useRouter();
@@ -27,23 +28,24 @@ export default function QuotePrice() {
             estimated_delivery: e.target.date.value,
             supplier_name: user.user_name,
             supplier_id: user.user_id,
+            status: "pending"
         }).select()
+        toast.success("Successfuly Offered Price!")
         router.push("/quotation")
         console.log(data, error)
 
     }
     useEffect(() => {
-        // console.log(params)
         (async function () {
             const { data, error } = await supabase
-                .from("assigned_shop")
-                .select(`*, user(*), shop(*)`)
-                .eq("supplier_id", user.user_id)
+                .from("quotes")
+                .select(`*, shop(*)`)
+                .eq("order_id", id)
             console.log(data, error)
             const { order } = await fetchOrderDetails(id, {
-                API_KEY: data[0].api_key,
-                SHOP_URL: data[0].shop_domain,
-                PASSWORD: data[0].api_access
+                API_KEY: data[0].shop.api_key,
+                SHOP_URL: data[0].shop.shop_domain,
+                PASSWORD: data[0].shop.api_access
             });
             console.log(order)
             setOrderData(order)
@@ -51,7 +53,8 @@ export default function QuotePrice() {
     }, [])
     return (<section className="">
         <div className="container px-4 md:px-6">
-            <div className="grid items-center gap-6 lg:grid-cols-[1fr_500px] lg:gap-12 xl:grid-cols-[1fr_550px]">
+            <div className="grid gap-6 items-center sm:gap-8 md:gap-10 lg:grid-cols-[1fr_500px] lg:gap-12 xl:grid-cols-[1fr_550px]">
+
                 <div className="flex flex-col justify-center space-y-4">
                     <div className="space-y-2">
                         <div className="inline-block rounded-lg bg-gray-100 p-1 text-sm dark:bg-gray-800">
@@ -69,13 +72,14 @@ export default function QuotePrice() {
                                             alt="Product Image"
                                             className="aspect-square object-cover rounded-lg"
                                             height={300}
-                                            src={item.image_url} // Use item.image_url if available
+                                            src={item.image_url}
                                             width={300}
                                         />
                                     </div>
                                 )}
                                 <div className="space-y-4">
                                     <div>
+                                        <span className='text-xs'>{item.vendor}</span>
                                         <h3 className="text-lg font-bold">{item.name}</h3>
                                         <div className="text-xl font-bold">${item.price}</div>
                                         <div className="flex items-center space-x-2">
@@ -104,8 +108,10 @@ export default function QuotePrice() {
                         </CardHeader>
                         <CardContent>
                             <form onSubmit={e => handleSubmit(e)} className='flex gap-10 flex-col'>
-                                <Input name="offer" placeholder="Enter Offer" />
-                                <Input name="date" type="date" />
+                                <div><Label>Offer Price</Label>
+                                    <Input name="offer" placeholder="Enter Offer" /></div>
+                                <div><Label>Estimated Delivery</Label>
+                                    <Input name="date" type="date" /></div>
                                 <Button type="submit">Submit</Button>
                             </form>
                         </CardContent>

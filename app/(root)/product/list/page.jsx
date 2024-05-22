@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import toast from "react-hot-toast";
 export default function ProdctList() {
     const [data, setData] = useState([]);
     const [shop, setShop] = useState({})
@@ -44,6 +45,7 @@ export default function ProdctList() {
             // Handle the error appropriately
             console.error("Error inserting data:", error.message);
         } else {
+            toast.success("Quote successfully created");
             // Data inserted successfully, you can access the inserted data in quoteData
             console.log("Data inserted successfully:", quoteData);
         }

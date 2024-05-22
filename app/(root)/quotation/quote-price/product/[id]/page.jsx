@@ -7,11 +7,14 @@ import Image from 'next/image'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { getCurrencyIcon } from '@/lib/utils'
+import { Label } from '@/components/ui/label'
+import toast from 'react-hot-toast'
 
 export default function QuotePrice() {
     const router = useRouter();
     const query = useSearchParams();
-    const quote_id = query.get("quote_id")
+    const quote_id = query.get("quote_id");
+    const [shop, setShop] = useState({})
     const { id } = useParams();
     const [productData, setProducrtData] = useState({});
     const user = JSON.parse(localStorage.getItem("user"));
@@ -23,7 +26,9 @@ export default function QuotePrice() {
             estimated_delivery: e.target.date.value,
             supplier_name: user.user_name,
             supplier_id: user.user_id,
+            shop_id: shop.id
         }).select()
+        toast.success("Successfuly Offered Price!")
         router.push("/quotation")
         console.log(data, error)
 
@@ -35,6 +40,7 @@ export default function QuotePrice() {
                 .from("product_quotes")
                 .select(`*, shop(*)`)
                 .eq("product_id", id)
+            setShop(data[0].shop)
             const { product } = await fetchProductDetails(id, {
                 API_KEY: data[0].shop.api_key,
                 SHOP_URL: data[0].shop.shop_domain,
@@ -46,7 +52,7 @@ export default function QuotePrice() {
     }, [])
     return (<section className="">
         <div className="container px-4 md:px-6">
-            <div className="grid items-center gap-6 lg:grid-cols-[1fr_500px] lg:gap-12 xl:grid-cols-[1fr_550px]">
+            <div className="grid items-start gap-6 lg:grid-cols-[1fr_500px] lg:gap-12 xl:grid-cols-[1fr_550px]">
                 <div className="flex flex-col justify-center space-y-4">
                     <Card className="w-full max-w-2xl border-none">
                         <div className="">
@@ -59,29 +65,29 @@ export default function QuotePrice() {
                                     width={600}
                                 />
                             </div>
-                            <div className="grid gap-4">
+                            <div className="grid gap-4 my-10">
                                 <div>
-                                    <h2 className="text-2xl font-bold">{productData.title}</h2>
+                                    <div className='flex item-center justify-between'>
+                                        <h2 className="text-2xl font-bold">{productData.title}</h2>
+                                        <p className="text-gray-500 text-xl dark:text-gray-400">
+                                            {productData.variants && productData.variants.length > 0 && (
+                                                <span>{`${getCurrencyIcon("EUR")} ${productData.variants[0].price}`}</span>
+                                            )}                                    </p>
+                                    </div>
                                     <p className="text-gray-500 dark:text-gray-400">
                                         {productData.tags}
                                     </p>
                                 </div>
-                                <div dangerouslySetInnerHTML={productData?.body_html}>
+                                <div className='my-3' dangerouslySetInnerHTML={{ __html: productData?.body_html }}>
+                                </div>
 
-                                </div>
-                                <div>
-                                    <p className="text-gray-500 dark:text-gray-400">
-                                        {productData.variants && productData.variants.length > 0 && (
-                                            <span>{`${getCurrencyIcon("EUR")} ${productData.variants[0].price}`}</span>
-                                        )}                                    </p>
-                                </div>
                             </div>
                         </div>
                     </Card>
 
                 </div>
 
-                <div className="flex flex-col">
+                <div className="flex flex-col sticky top-4">
                     <div className='w-full H-10'>
                         <Image src={require("../../../../../../public/supplier-quote.svg")} height={100} width={450} />
                     </div>
@@ -93,8 +99,10 @@ export default function QuotePrice() {
                         </CardHeader>
                         <CardContent>
                             <form onSubmit={e => handleSubmit(e)} className='flex gap-10 flex-col'>
-                                <Input name="offer" placeholder="Enter Offer" />
-                                <Input name="date" type="date" />
+                                <div><Label>Offer Price</Label>
+                                    <Input name="offer" placeholder="Enter Offer" /></div>
+                                <div><Label>Estimated Delivery</Label>
+                                    <Input name="date" type="date" /></div>
                                 <Button type="submit">Submit</Button>
                             </form>
                         </CardContent>
