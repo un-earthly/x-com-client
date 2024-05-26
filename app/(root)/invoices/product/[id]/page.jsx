@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { useParams } from 'next/navigation';
 import { fetchOrderDetails, supabase } from '@/api';
 import Link from 'next/link';
-import { getCurrencyIcon } from '@/lib/utils';
 
 export default function Invoice() {
     const { id } = useParams();
@@ -17,10 +16,10 @@ export default function Invoice() {
 
                 // Load invoice data from the invoices table
                 const { data: invoices, error } = await supabase
-                    .from("invoices")
+                    .from("product_invoices")
                     .select(`*, user(*)`)
-                    .eq("invoice_number", id[0]);
-                const { data: userShop, error: userShopErr } = await supabase.from("quotes").select(`*,shop(*),user(*)`).eq("order_id", invoices[0].order_number)
+                    .eq("product_id", id[0]);
+                const { data: userShop, error: userShopErr } = await supabase.from("quotes").select(`*,shop(*)`).eq("product_id", invoices[0].product_id)
 
                 const { order } = await fetchOrderDetails(userShop[0].order_id, {
                     API_KEY: userShop[0].shop.api_key,
@@ -28,7 +27,6 @@ export default function Invoice() {
                     PASSWORD: userShop[0].shop.api_access
                 })
                 setInvoiceData({ order, invoice_details: invoices[0] })
-                console.log({ order, invoice_details: invoices[0], user: userShop[0] })
             } catch (error) {
                 console.error("An error occurred while loading and converting data:", error.message);
                 return null;
@@ -95,12 +93,12 @@ export default function Invoice() {
                     <CardTitle className="text-2xl font-bold">Invoice</CardTitle>
                     <CardDescription>Invoice # {id[0]}</CardDescription>
                 </div>
-                {/* <div className="grid gap-1 text-sm capitalize">
+                <div className="grid gap-1 text-sm capitalize">
                     <div className="font-medium">Acme Inc</div>
                     <div>123 Street</div>
                     <div>City, State, Zip</div>
                     <div>United States</div>
-                </div> */}
+                </div>
             </CardHeader>
             {id[1] === "edit" ? <CardContent className="p-0">
                 <div className="border border-dashed border-gray-200 rounded-lg p-4 dark:border-gray-800">
@@ -233,19 +231,22 @@ export default function Invoice() {
                                 <div className="font-medium">Invoice to</div>
                                 <div className="grid grid-cols-2 gap-1 capitalize">
                                     <div className="font-medium">
-                                        {invoiceData?.invoice_details?.user?.user_name}
+                                        {invoiceData?.customer?.name}
                                         <br />
+                                        {invoiceData?.customer?.phone}
                                     </div>
                                     <div>
-                                        Email: {invoiceData?.invoice_details?.user?.user_email}
+                                        {invoiceData?.customer?.address_line1}
                                         <br />
-                                        Phone: {invoiceData?.invoice_details?.user?.user_phone}
+                                        {invoiceData?.customer?.address_line2}
+                                        <br />
+                                        {invoiceData?.customer?.address_line3}
                                     </div>
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <div className="font-medium">Invoice number</div>
-                                <div>#{invoiceData?.invoice_details?.invoice_number}</div>
+                                <div>#{invoiceData?.invoice_number}</div>
                                 <div className="font-medium">Date</div>
                                 <div>{invoiceData?.invoice_date}</div>
                             </div>
@@ -253,16 +254,18 @@ export default function Invoice() {
                         <Table className="w-full border-collapse">
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="text-xs">Name</TableHead>
+                                    <TableHead className="text-xs">Description</TableHead>
                                     <TableHead className="w-1/4 text-xs">Qty</TableHead>
                                     <TableHead className="w-1/4 text-xs">Price</TableHead>
+                                    <TableHead className="w-1/4 text-xs text-right">Tax</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {invoiceData?.order?.line_items?.map((item, index) => <TableRow key={index} className="text-sm">
-                                    <TableCell>{item.title}</TableCell>
+                                {invoiceData?.items?.map((item, index) => <TableRow key={index} className="text-sm">
+                                    <TableCell>{item.description}</TableCell>
                                     <TableCell>{item.quantity}</TableCell>
-                                    <TableCell>{getCurrencyIcon("EUR")}{item.price}</TableCell>
+                                    <TableCell>${item.price}</TableCell>
+                                    <TableCell className="text-right">${item.tax}</TableCell>
                                 </TableRow>)}
                             </TableBody>
                         </Table>
@@ -273,11 +276,11 @@ export default function Invoice() {
                             </div>
                             <div className="space-y-2">
                                 <div className="font-medium">Subtotal</div>
-                                <div>{getCurrencyIcon("EUR")} {invoiceData?.invoice_details?.total_price}</div>
+                                <div>$ {calculateSubtotal}</div>
                                 <div className="font-medium">Taxes</div>
-                                <div>{getCurrencyIcon("EUR")}{invoiceData?.order?.tax_lines[0]?.price}</div>
+                                <div>${calculateTotalTax}</div>
                                 <div className="font-semibold">Total</div>
-                                <div>{getCurrencyIcon("EUR")}{Number(invoiceData?.invoice_details?.total_price) + Number(invoiceData?.order?.tax_lines[0]?.price)}</div>
+                                <div>${calculateTotal}</div>
                             </div>
                         </div>
                     </div>

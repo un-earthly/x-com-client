@@ -14,10 +14,7 @@ import React, { useEffect, useState } from 'react'
 export default function Layout({ children }) {
     const [userRole, setUserRole] = useState("")
     const router = useRouter();
-    const [activeLink, setActiveLink] = useState('Dashboard');
-    const handleLinkClick = (link) => {
-        setActiveLink(link);
-    };
+
     let userSession;
     useEffect(() => {
         userSession = JSON.parse(localStorage.getItem('user'))
@@ -42,8 +39,8 @@ export default function Layout({ children }) {
                         <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
                             <Link
                                 href="/dashboard"
-                                className={`flex items-center gap-3 rounded-lg px-3 py-2 ${activeLink === '/dashboard' ? ' text-primary' : 'text-muted-foreground'} transition-all hover:text-primary`}
-                                onClick={() => handleLinkClick('/dashboard')}
+                                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary`}
+                                
                             >
                                 <Home className="h-4 w-4" />
                                 Dashboard
@@ -52,62 +49,62 @@ export default function Layout({ children }) {
 
                             {userRole === ROLE_USER && <Link
                                 href="/order"
-                                className={`flex items-center gap-3 rounded-lg px-3 py-2 ${activeLink === '/order' ? 'text-primary' : 'text-muted-foreground'} transition-all hover:text-primary`}
-                                onClick={() => handleLinkClick('/order')}
+                                className={`flex items-center gap-3 rounded-lg px-3 py-2  transition-all hover:text-primary`}
+                                
                             >
                                 <ShoppingCart className="h-4 w-4" />
                                 Orders
                             </Link>}
                             {userRole !== ROLE_USER && <Link
                                 href="/supplier-order"
-                                className={`flex items-center gap-3 rounded-lg px-3 py-2 ${activeLink === '/order' ? 'text-primary' : 'text-muted-foreground'} transition-all hover:text-primary`}
-                                onClick={() => handleLinkClick('/order')}
+                                className={`flex items-center gap-3 rounded-lg px-3 py-2  transition-all hover:text-primary`}
+                                
                             >
                                 <ShoppingCart className="h-4 w-4" />
                                 Orders
                             </Link>}
                             {userRole === ROLE_USER && <Link
                                 href="/product/list"
-                                className={`flex items-center gap-3 rounded-lg ${activeLink === '/product/list' ? 'text-primary' : 'text-muted-foreground'} px-3 py-2 transition-all hover:text-primary`}
-                                onClick={() => handleLinkClick('/product/list')}
+                                className={`flex items-center gap-3 rounded-lg  px-3 py-2 transition-all hover:text-primary`}
+                                
                             >
                                 <Package className="h-4 w-4" />
                                 Products
                             </Link>}
                             <Link
                                 href="/quotation"
-                                className={`flex items-center gap-3 rounded-lg px-3 py-2 ${activeLink === '/quotation' ? ' text-primary' : 'text-muted-foreground'} transition-all hover:text-primary`}
-                                onClick={() => handleLinkClick('/quotation')}
+                                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary`}
+                                
                             >
                                 <Users className="h-4 w-4" />
                                 Quotation
                             </Link>
                             <Link
                                 href="/invoices"
-                                className={`flex items-center gap-3 rounded-lg px-3 py-2 ${activeLink === '/invoices' ? ' text-primary' : 'text-muted-foreground'} transition-all hover:text-primary`}
-                                onClick={() => handleLinkClick('/invoices')}
+                                className={`flex items-center gap-3 rounded-lg px-3 py-2  transition-all hover:text-primary`}
+                                
                             >
                                 <LineChart className="h-4 w-4" />
                                 Invoices
                             </Link>
                             <Link
                                 href="/ticket"
-                                className={`flex items-center gap-3 rounded-lg px-3 py-2 ${activeLink === '/ticket' ? ' text-primary' : 'text-muted-foreground'} transition-all hover:text-primary`}
-                                onClick={() => handleLinkClick('/ticket')}
+                                className={`flex items-center gap-3 rounded-lg px-3 py-2  transition-all hover:text-primary`}
+                                
                             >
                                 <Home className="h-4 w-4" />
                                 Tickets
                             </Link>
                             {userRole === ROLE_ADMIN && <Link
                                 href="/assign-store"
-                                className={`flex items-center gap-3 rounded-lg ${activeLink === '/product/list' ? 'text-primary' : 'text-muted-foreground'} px-3 py-2 transition-all hover:text-primary`}
+                                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary`}
                             >
                                 <Package className="h-4 w-4" />
                                 Assign Store
                             </Link>}
                             {userRole === ROLE_ADMIN && <Link
                                 href="/send-invite"
-                                className={`flex items-center gap-3 rounded-lg ${activeLink === '/product/list' ? 'text-primary' : 'text-muted-foreground'} px-3 py-2 transition-all hover:text-primary`}
+                                className={`flex items-center gap-3 rounded-lg  px-3 py-2 transition-all hover:text-primary`}
                             >
                                 <Package className="h-4 w-4" />
                                 Invite Suppliers
@@ -140,16 +137,16 @@ export default function Layout({ children }) {
                                 </Link>
                                 <Link
                                     href="#"
-                                    className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 ${activeLink === 'Dashboard' ? 'text-primary' : 'text-muted-foreground'} hover:text-foreground`}
-                                    onClick={() => handleLinkClick('Dashboard')}
+                                    className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2  hover:text-foreground`}
+                                    
                                 >
                                     <Home className="h-5 w-5" />
                                     Dashboard
                                 </Link>
                                 <Link
                                     href="#"
-                                    className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 ${activeLink === 'Orders' ? 'text-primary' : 'text-muted-foreground'} hover:text-foreground`}
-                                    onClick={() => handleLinkClick('Orders')}
+                                    className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2  hover:text-foreground`}
+                                    
                                 >
                                     <ShoppingCart className="h-5 w-5" />
                                     Orders
@@ -159,16 +156,16 @@ export default function Layout({ children }) {
                                 </Link>
                                 <Link
                                     href="#"
-                                    className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 ${activeLink === 'Products' ? 'text-primary' : 'text-muted-foreground'} hover:text-foreground`}
-                                    onClick={() => handleLinkClick('Products')}
+                                    className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:text-foreground`}
+                                    
                                 >
                                     <Package className="h-5 w-5" />
                                     Products
                                 </Link>
                                 <Link
                                     href="#"
-                                    className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 ${activeLink === 'Customers' ? 'text-primary' : 'text-muted-foreground'} hover:text-foreground`}
-                                    onClick={() => handleLinkClick('Customers')}
+                                    className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2  hover:text-foreground`}
+                                    
                                 >
                                     <Users className="h-5 w-5" />
                                     Customers

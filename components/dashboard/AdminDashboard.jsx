@@ -1,4 +1,5 @@
-import React from 'react'
+"use client"
+import React, { useEffect, useState } from 'react'
 import DashboardCard from '../custom/DashboardCard'
 import BuyerIcon from '../custom/BuyerIcon'
 import DelivariesIcon from '../custom/DelivariesIcon'
@@ -9,7 +10,28 @@ import { ResponsivePie } from '@nivo/pie'
 import { ResponsiveBar } from '@nivo/bar'
 import Link from 'next/link'
 import { ActivityIcon, CreditCardIcon, DollarSignIcon, Eye, UsersIcon } from 'lucide-react'
+import { supabase } from '@/api'
 export default function AdminDashboard() {
+    const [ticketData, setData] = useState([])
+    useEffect(() => {
+        (async () => {
+            try {
+                let { data, error } = await supabase
+                    .from("support_tickets")
+                    .select(`*,user(*)`)
+                    .eq("priority", "high");
+
+                if (error) {
+                    throw error;
+                }
+                setData(data)
+                console.log(data);
+            } catch (err) {
+                console.log(err);
+            }
+        })();
+
+    }, [])
     const data = [
         {
             id: 1,
@@ -79,88 +101,6 @@ export default function AdminDashboard() {
         },
     ]
 
-    const ticketData = [
-        {
-            "id": "magc9qgj",
-            "name": "Ticket Creator 1",
-            "status": "in progress",
-            "priority": "low",
-            "issue_at": "1/13/2016",
-            "resolve_at": ""
-        },
-        {
-            "id": "kqmwamtf",
-            "name": "Ticket Creator 2",
-            "status": "resolved",
-            "priority": "low",
-            "issue_at": "5/11/2014",
-            "resolve_at": "1/12/2015"
-        },
-        {
-            "id": "lt2egi3d",
-            "name": "Ticket Creator 3",
-            "status": "resolved",
-            "priority": "high",
-            "issue_at": "8/26/2014",
-            "resolve_at": "12/7/2020"
-        },
-        {
-            "id": "00vw9csa",
-            "name": "Ticket Creator 4",
-            "status": "resolved",
-            "priority": "medium",
-            "issue_at": "6/27/2014",
-            "resolve_at": "11/17/2021"
-        },
-        {
-            "id": "tbpsz1v8",
-            "name": "Ticket Creator 5",
-            "status": "resolved",
-            "priority": "high",
-            "issue_at": "4/3/2019",
-            "resolve_at": "7/8/2021"
-        },
-        {
-            "id": "izg5bmg9",
-            "name": "Ticket Creator 6",
-            "status": "resolved",
-            "priority": "low",
-            "issue_at": "12/10/2019",
-            "resolve_at": "7/14/2020"
-        },
-        {
-            "id": "thqgfbe2",
-            "name": "Ticket Creator 7",
-            "status": "new",
-            "priority": "low",
-            "issue_at": "5/7/2015",
-            "resolve_at": ""
-        },
-        {
-            "id": "d43l5bwp",
-            "name": "Ticket Creator 8",
-            "status": "resolved",
-            "priority": "urgent",
-            "issue_at": "6/16/2015",
-            "resolve_at": "2/10/2019"
-        },
-        {
-            "id": "skc0guvh",
-            "name": "Ticket Creator 9",
-            "status": "new",
-            "priority": "low",
-            "issue_at": "2/2/2020",
-            "resolve_at": ""
-        },
-        {
-            "id": "4kad9lep",
-            "name": "Ticket Creator 10",
-            "status": "new",
-            "priority": "high",
-            "issue_at": "9/10/2022",
-            "resolve_at": ""
-        }
-    ]
     return (
         <div>
             <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
@@ -342,7 +282,7 @@ export default function AdminDashboard() {
 
                 </CardContent>
             </Card>
-            <Card>
+            {/* <Card>
                 <CardHeader>
                     <CardTitle>Recent Orders</CardTitle>
                 </CardHeader>
@@ -419,7 +359,7 @@ export default function AdminDashboard() {
                     </div>
 
                 </CardContent>
-            </Card>
+            </Card> */}
 
             <Card>
                 <CardHeader>
@@ -444,7 +384,7 @@ export default function AdminDashboard() {
                                             {td.id}
                                         </TableCell>
                                         <TableCell>
-                                            {td.name}
+                                            {td.ticket_subject}
                                         </TableCell>
                                         <TableCell>
                                             {td.status}
@@ -459,7 +399,7 @@ export default function AdminDashboard() {
                                             {td.resolve_at ? td.resolve_at : "Yet to resolve"}
                                         </TableCell>
                                         <TableCell>
-                                            <Link href={`invoices/${td.id}`}>
+                                            <Link href={`ticket/${td.id}`}>
                                                 <div className='flex justify-end'>
                                                     <Eye />
                                                 </div>
