@@ -17,6 +17,7 @@ import Image from "next/image"
 import toast from "react-hot-toast"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { useState } from "react"
 
 
 const formSchema = z.object({
@@ -36,14 +37,19 @@ export default function Login() {
             email: "",
             password: "",
         },
-    })
+    });
+    const [loading, setLoading] = useState(false)
+
     async function onSubmit(values) {
+        setLoading(true)
+
         const { error, data } = await supabase.auth.signInWithPassword({
             email: values.email,
             password: values.password
         })
         if (error) {
             toast.error(error.message)
+            setLoading(false)
             return
         }
         const { data: userData, error: userError } = await supabase
@@ -53,6 +59,7 @@ export default function Login() {
             .single();
         if (userError) {
             toast.error(userError.message)
+            setLoading(false)
             return
         }
         const sessionWithRoles = {
@@ -62,7 +69,6 @@ export default function Login() {
         };
         toast.success("Logged in!")
         localStorage.setItem('user', JSON.stringify(sessionWithRoles))
-
         router.push("/dashboard")
     }
     return (
@@ -93,7 +99,9 @@ export default function Login() {
                         </FormItem>
                     )}
                 />
-                <Button type="submit">Login</Button>
+                <Button type="submit" disabled={loading}>
+                    {loading ? "Logging in..." : "Login"}
+                </Button>
                 <div className="flex justify-between text-xs">
                     <p>
                         New here? <Link href="/register" className="underline">Register</Link>

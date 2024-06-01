@@ -17,24 +17,26 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import Link from 'next/link'
 import toast from "react-hot-toast"
+import { useState } from "react"
 
 const formSchema = z.object({
     email: z.string().min(2, {
-        message: "email must be at least 2 characters.",
+        message: "Email must be at least 2 characters.",
     }),
     password: z.string().min(2, {
-        message: "email must be at least 2 characters.",
+        message: "Password must be at least 2 characters.",
     }),
     name: z.string().min(2, {
-        message: "email must be at least 2 characters.",
+        message: "Name must be at least 2 characters.",
     }),
     phone: z.string().min(2, {
-        message: "email must be at least 2 characters.",
+        message: "Phone must be at least 2 characters.",
     }),
 })
 export default function Register() {
 
     const router = useRouter()
+    const [loading, setLoading] = useState(false)
 
 
     const form = useForm({
@@ -47,6 +49,8 @@ export default function Register() {
         },
     })
     async function onSubmit(values) {
+        setLoading(true)
+
         const { error, data } = await supabase.auth.signUp({
             email: values.email,
             password: values.password,
@@ -74,6 +78,8 @@ export default function Register() {
         } else {
             console.error(error.message);
         }
+        setLoading(false)
+
     }
 
 
@@ -131,7 +137,9 @@ export default function Register() {
                         </FormItem>
                     )}
                 />
-                <Button type="submit">Register</Button>
+                <Button type="submit" disabled={loading}>
+                    {loading ? "Registering..." : "Register"}
+                </Button>
                 <p className="text-center text-xs ">
                     Already here? <Link href="/login" className="underline">Login</Link>
                 </p>

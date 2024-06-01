@@ -202,7 +202,7 @@ export default function CreateInvoice() {
                                         <div key={index} className="grid grid-cols-5 items-start gap-2">
                                             <Input readOnly className="col-span-2" value={item.title} />
                                             <Input readOnly value={item.quantity} />
-                                            <Input readOnly value={`${getCurrencyIcon(item?.price_set?.shop_money?.currency_code)} ${item.price}`} />
+                                            <Input readOnly value={`${getCurrencyIcon("EUR")} ${item.price}`} />
                                         </div>
                                     );
                                 })}

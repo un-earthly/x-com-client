@@ -29,38 +29,19 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { client, createShopifyClient, supabase } from "@/api"
+import { supabase } from "@/api"
 import { MoreHorizontal } from "lucide-react"
 import { fetchOrders } from '@/api.js'
 import { getCurrencyIcon } from "@/lib/utils"
 import toast from "react-hot-toast"
 export default function Orders() {
-
+    const [loading, setLoading] = React.useState(true); 
     const [data, setData] = React.useState([]);
     const [user, setUser] = React.useState("")
     const [shop, setShop] = React.useState("");
 
     const handleUpForQuote = async (id, order_number, amount) => {
         try {
-            // Fetch the shop data for the current user
-            // const { data: shopData, error: shopErr } = await supabase
-            //     .from("shop")
-            //     .select()
-            //     .eq("user_id", user.user_id);
-
-            // if (shopErr) {
-            //     console.error('Error fetching shop data:', shopErr.message);
-            //     toast.error("Error fetching shop data");
-            //     return;
-            // }
-
-            // if (!shopData || shopData.length === 0) {
-            //     console.error('No shop data found for the user');
-            //     toast.error("No shop data found");
-            //     return;
-            // }
-
-            // Insert data into the Supabase table
             const { data, error } = await supabase
                 .from('quotes')
                 .insert({
@@ -111,6 +92,8 @@ export default function Orders() {
             } catch (error) {
                 console.error("Error fetching orders:", error);
             }
+            setLoading(false); // Set loading to false after data is fetched
+
         }
 
         fetchData();
@@ -133,51 +116,59 @@ export default function Orders() {
 
             </div>
             <div className="rounded-md border">
-                {user.role === "supplier" ? <></> : <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[100px]">Order Id</TableHead>
-                            <TableHead>Ordered by</TableHead>
-                            <TableHead>Contact</TableHead>
-                            <TableHead>Payment Status</TableHead>
-                            <TableHead>Amount</TableHead>
-                            <TableHead className="text-right"></TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {data?.length > 0 ? data.map((d) => (
-                            <TableRow key={d?.id}>
-                                <TableCell className="font-medium">#{d?.order_number}</TableCell>
-                                <TableCell>{d?.customer?.first_name} {" "}{d?.customer?.last_name}</TableCell>
-                                <TableCell>{d?.phone || d?.email}</TableCell>
-                                <TableCell>{d?.financial_status}</TableCell>
-                                <TableCell >{getCurrencyIcon(d?.currency)}{d?.total_price}</TableCell>
-                                <TableCell className="text-right"> <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" className="h-8 w-8 p-0">
-                                            <span className="sr-only">Open menu</span>
-                                            <MoreHorizontal className="h-4 w-4" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem><Link href={`/order/${d?.id}`}>View Details</Link></DropdownMenuItem>
-                                        <DropdownMenuItem><div onClick={() => handleUpForQuote(d.id, d.order_number, d.total_price)}>Up For Quote</div></DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu></TableCell>
+                {user.role === "supplier" ? null : loading ? (
+                    <div className="flex justify-center items-center h-24">
+                        <p>Loading...</p>
+                    </div>
+                ) : (
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-[100px]">Order Id</TableHead>
+                                <TableHead>Ordered by</TableHead>
+                                <TableHead>Contact</TableHead>
+                                <TableHead>Payment Status</TableHead>
+                                <TableHead>Amount</TableHead>
+                                <TableHead className="text-right"></TableHead>
                             </TableRow>
-                        )) : <TableRow>
-                            <TableCell
-                                colSpan={5}
-                                className="h-24 text-center"
-                            >
-                                No results.
-                            </TableCell>
-                        </TableRow>}
-                    </TableBody>
-
-                </Table>}
+                        </TableHeader>
+                        <TableBody>
+                            {data?.length > 0 ? data.map((d) => (
+                                <TableRow key={d?.id}>
+                                    <TableCell className="font-medium">#{d?.order_number}</TableCell>
+                                    <TableCell>{d?.customer?.first_name} {" "}{d?.customer?.last_name}</TableCell>
+                                    <TableCell>{d?.phone || d?.email}</TableCell>
+                                    <TableCell>{d?.financial_status}</TableCell>
+                                    <TableCell>{getCurrencyIcon("EUR")}{d?.total_price}</TableCell>
+                                    <TableCell className="text-right">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                                    <span className="sr-only">Open menu</span>
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem><Link href={`/order/${d?.id}`}>View Details</Link></DropdownMenuItem>
+                                                <DropdownMenuItem>
+                                                    <div onClick={() => handleUpForQuote(d.id, d.order_number, d.total_price)}>Up For Quote</div>
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </TableCell>
+                                </TableRow>
+                            )) : (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="h-24 text-center">
+                                        No results.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                )}
 
 
 

@@ -1,5 +1,5 @@
 "use client"
-import { fetchProductDetails } from '@/api';
+import { fetchProductDetails, supabase } from '@/api';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { getCurrencyIcon } from '@/lib/utils';
@@ -11,11 +11,21 @@ export default function Page() {
   const [product, setProduct] = useState({});
   const [imgSrc, setImgSrc] = useState("")
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"))
+
     async function handleGetDetails() {
 
-      const productDetails = await fetchProductDetails(id)
-      console.log(productDetails.product)
-      setProduct(productDetails.product)
+      const { data, error } = await supabase
+        .from("shop")
+        .select()
+        .eq("user_id", user.user_id)
+      const { product } = await fetchProductDetails(id, {
+        API_KEY: data[0].api_key,
+        SHOP_URL: data[0].shop_domain,
+        PASSWORD: data[0].api_access
+      })
+      console.log(product)
+      setProduct(product)
     }
     handleGetDetails()
   }, [])
@@ -51,7 +61,7 @@ export default function Page() {
           </div>
           <div className="space-y-2">
 
-            <p className="font-bold text-2xl">{getCurrencyIcon(product?.presentment_prices?.price?.currency_code || "")}{product?.price}</p>
+            <p className="font-bold text-2xl">{getCurrencyIcon("EUR")}{product?.variants[0].price}</p>
           </div>
           <form className="grid gap-4 md:gap-10">
             {product?.options?.map(d => <div key={d?.name} className="grid gap-2">
@@ -73,23 +83,6 @@ export default function Page() {
           <Button>
             Up for quote
           </Button>
-          {/* <form className="grid gap-4 md:gap-10">
-            {product?.variants?.map(d => <div key={d?.id} className="grid gap-2">
-              <Label className="text-base" htmlFor="color">
-                {d?.price}
-              </Label>
-              <div className="flex">
-                {d?.values?.map(d => <Label key={d}
-                  className="border cursor-pointer rounded-md p-2 flex items-center gap-2 [&:has(:checked)]:bg-gray-100 dark:[&:has(:checked)]:bg-gray-800"
-                  htmlFor="color-black"
-                >
-                  {d}
-                </Label>)}
-              </div>
-            </div>
-            )}
-
-          </form> */}
         </div>
         <div dangerouslySetInnerHTML={{ __html: product?.body_html }} />
 

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { ResponsiveBar } from '@nivo/bar'
-import {  Eye} from 'lucide-react'
+import { Eye } from 'lucide-react'
 import Link from 'next/link'
 import {
   Table,
@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { supabase } from '@/api'
+import { fetchOrders, supabase } from '@/api'
 
 export const columns = [
   {
@@ -43,7 +43,11 @@ export default function UserDashboard() {
   const [hotProducts, setHotProducts] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [cardData, setCardData] = useState([])
+  const [user, setUser] = useState([])
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"))
+    setUser(user)
+
     async function getDashboardCardsData() {
       try {
         const { data, error } = await supabase
@@ -63,42 +67,34 @@ export default function UserDashboard() {
     getDashboardCardsData();
     async function getProductsData() {
       try {
-        // Fetch data from the local server
-        const response = await fetch("https://x-com-server.onrender.com/orders");
+        const { data, error } = await supabase
+          .from("shop")
+          .select()
+          .eq("user_id", user.user_id)
+        const { orders } = await fetchOrders({
+          API_KEY: data[0].api_key,
+          SHOP_URL: data[0].shop_domain,
+          PASSWORD: data[0].api_access
+        });
 
-        // Check if the response is successful
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        // Parse the JSON response
-        const data = await response.json();
-
-        // Array to store products with quantities and names
         const productsArray = [];
-
-        // Extract product IDs, names, and quantities from the orders
-        data.orders.forEach(order => {
+        orders.forEach(order => {
           order.line_items.forEach(lineItem => {
             const productId = lineItem.product_id;
             const productName = lineItem.name;
             const sales = lineItem.quantity;
-            // Check if the product already exists in the array
             const existingProduct = productsArray.find(product => product.productId === productId);
             if (existingProduct) {
-              // If product exists, update its quantity
               existingProduct.sales += sales;
             } else {
-              // If product doesn't exist, add it to the array
               productsArray.push({ productId, productName, sales });
             }
           });
         });
 
-        // Log the result
+        console.log(productsArray)
         setHotProducts(productsArray);
 
-        // Set the data in state or do further processing
       } catch (error) {
         console.error("Error fetching data:", error.message);
       }
@@ -142,8 +138,6 @@ export default function UserDashboard() {
         </Card>)}
 
       </div>
-
-
       <Card>
         <CardHeader>
           <CardTitle>

@@ -106,7 +106,7 @@ export default function Page() {
                                 <div className="grid gap-1.5">
                                     <div className="font-medium">{i?.title}</div>
                                     <div>Quantity: {i?.quantity}</div>
-                                    <div>Price per item: {getCurrencyIcon(data.currency)}{i?.price}</div>
+                                    <div>Price per item: {getCurrencyIcon("EUR")}{i?.price}</div>
                                     <div className="font-medium">Total price: ${i?.quantity * i?.price}</div>
                                 </div>
                             </div>
