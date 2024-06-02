@@ -11,6 +11,7 @@ import { getCurrencyIcon } from '@/lib/utils';
 export default function Invoice() {
     const { id } = useParams();
     const [invoiceData, setInvoiceData] = useState({});
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
         async function loadDataAndConvertToJson() {
             try {
@@ -28,6 +29,7 @@ export default function Invoice() {
                     PASSWORD: userShop[0].shop.api_access
                 })
                 setInvoiceData({ order, invoice_details: invoices[0] })
+                setLoading(false)
                 console.log({ order, invoice_details: invoices[0], user: userShop[0] })
             } catch (error) {
                 console.error("An error occurred while loading and converting data:", error.message);
@@ -86,7 +88,11 @@ export default function Invoice() {
             console.error("Error saving invoice data:", error.message);
         }
     };
-
+    if (loading) {
+        return <p>
+            Loading ...
+        </p>
+    }
 
     return (
         <Card className="w-full max-w-4xl mx-auto" variant="2">
@@ -95,12 +101,6 @@ export default function Invoice() {
                     <CardTitle className="text-2xl font-bold">Invoice</CardTitle>
                     <CardDescription>Invoice # {id[0]}</CardDescription>
                 </div>
-                {/* <div className="grid gap-1 text-sm capitalize">
-                    <div className="font-medium">Acme Inc</div>
-                    <div>123 Street</div>
-                    <div>City, State, Zip</div>
-                    <div>United States</div>
-                </div> */}
             </CardHeader>
             {id[1] === "edit" ? <CardContent className="p-0">
                 <div className="border border-dashed border-gray-200 rounded-lg p-4 dark:border-gray-800">
@@ -288,7 +288,7 @@ export default function Invoice() {
                     {/* <Link href={`/invoices/${id[0]}/edit`}>
                         <Button variant="outline">Edit</Button>
                     </Link> */}
-                    <Button onClick={undefined}>Download</Button>
+                    {/* <Button onClick={undefined}>Download</Button> */}
                 </> : id[1] === "preview" ?
                     <Link href={`/invoices/users`}>  <Button onClick={() => localStorage.setItem("invoice-id", id[0])}>Continue</Button></Link> : <>
                         <Link href={`/invoices/${id[0]}/view`}>

@@ -29,10 +29,16 @@ export default function Page() {
             } catch (error) {
                 console.error("Error fetching orders:", error);
             }
+            setLoading(false)
         }
 
         fetchData();
-    }, [])
+    }, []);
+    if (loading) {
+        return <p>
+            Loading...
+        </p>
+    }
     return (
         <>
             <Card>

@@ -48,7 +48,7 @@ export default function DataTableDemo() {
   }, [])
   const handleStatusUpdate = async (status, id) => {
     console.log(id)
-    const { data: updatedStatus, error } = await supabase.from("")
+    const { data: updatedStatus, error } = await supabase.from("invoices")
       .update({ status }).eq("invoice_number", id).select("status");
     console.log(error)
     setStatus(status);
@@ -68,6 +68,8 @@ export default function DataTableDemo() {
       });
       toast.success("Successfully updated status")
     }
+    toast.error("error while updating")
+
     console.log(data, updatedStatus)
 
   }
@@ -214,11 +216,11 @@ export default function DataTableDemo() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>{status}</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem><div onClick={() => handleStatusUpdate("send", d.invoice_number)}>Send</div></DropdownMenuItem>
-                        <DropdownMenuItem><div onClick={() => handleStatusUpdate("in progress", d.invoice_number)}>In Progress</div></DropdownMenuItem>
-                        <DropdownMenuItem><div onClick={() => handleStatusUpdate("verifying", d.invoice_number)}>Verifying</div></DropdownMenuItem>
-                        <DropdownMenuItem><div onClick={() => handleStatusUpdate("unpaid", d.invoice_number)}>Unpaid</div></DropdownMenuItem>
-                        <DropdownMenuItem><div onClick={() => handleStatusUpdate("paid", d.invoice_number)}>Paid</div></DropdownMenuItem>
+                        <DropdownMenuItem><div className="w-full" onClick={() => handleStatusUpdate("send", d.invoice_number)}>Send</div></DropdownMenuItem>
+                        <DropdownMenuItem><div className="w-full" onClick={() => handleStatusUpdate("in progress", d.invoice_number)}>In Progress</div></DropdownMenuItem>
+                        <DropdownMenuItem><div className="w-full" onClick={() => handleStatusUpdate("verifying", d.invoice_number)}>Verifying</div></DropdownMenuItem>
+                        <DropdownMenuItem><div className="w-full" onClick={() => handleStatusUpdate("unpaid", d.invoice_number)}>Unpaid</div></DropdownMenuItem>
+                        <DropdownMenuItem><div className="w-full" onClick={() => handleStatusUpdate("paid", d.invoice_number)}>Paid</div></DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu> : <div className="capitalize">{d.status}</div>}
                   </TableCell>
@@ -271,11 +273,11 @@ export default function DataTableDemo() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>{status}</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem><div onClick={() => handleStatusUpdate("send", d.invoices.invoice_number)}>Send</div></DropdownMenuItem>
-                        <DropdownMenuItem><div onClick={() => handleStatusUpdate("in progress", d.invoices.invoice_number)}>In Progress</div></DropdownMenuItem>
-                        <DropdownMenuItem><div onClick={() => handleStatusUpdate("verifying", d.invoices.invoice_number)}>Verifying</div></DropdownMenuItem>
-                        <DropdownMenuItem><div onClick={() => handleStatusUpdate("unpaid", d.invoices.invoice_number)}>Unpaid</div></DropdownMenuItem>
-                        <DropdownMenuItem><div onClick={() => handleStatusUpdate("paid", d.invoices.invoice_number)}>Paid</div></DropdownMenuItem>
+                        <DropdownMenuItem><div className="w-full" onClick={() => handleStatusUpdate("send", d.invoices.invoice_number)}>Send</div></DropdownMenuItem>
+                        <DropdownMenuItem><div className="w-full" onClick={() => handleStatusUpdate("in progress", d.invoices.invoice_number)}>In Progress</div></DropdownMenuItem>
+                        <DropdownMenuItem><div className="w-full" onClick={() => handleStatusUpdate("verifying", d.invoices.invoice_number)}>Verifying</div></DropdownMenuItem>
+                        <DropdownMenuItem><div className="w-full" onClick={() => handleStatusUpdate("unpaid", d.invoices.invoice_number)}>Unpaid</div></DropdownMenuItem>
+                        <DropdownMenuItem><div className="w-full" onClick={() => handleStatusUpdate("paid", d.invoices.invoice_number)}>Paid</div></DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu> : <div className="capitalize">{d?.status}</div>}
                   </TableCell>
@@ -292,11 +294,11 @@ export default function DataTableDemo() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                            <DropdownMenuItem><Link href={`/invoices/${d.invoices.invoice_number}/view`}>View invoice details</Link></DropdownMenuItem>
+                          <DropdownMenuItem><Link href={`/invoices/${d.invoices.invoice_number}/view`}>View invoice details</Link></DropdownMenuItem>
                           <DropdownMenuItem > <div onClick={() => setEditState(true)}>Update Status</div></DropdownMenuItem>
                           {role === ROLE_ADMIN && <>
                             <DropdownMenuItem>
-                                <div onClick={() => handleDeleteInvoice(d.invoices.invoice_number)}>Delete invoice</div></DropdownMenuItem>
+                              <div onClick={() => handleDeleteInvoice(d.invoices.invoice_number)}>Delete invoice</div></DropdownMenuItem>
                           </>}</DropdownMenuContent>
                       </DropdownMenu >
                     </TableCell>

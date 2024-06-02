@@ -5,10 +5,13 @@ import { Label } from '@/components/ui/label';
 import { getCurrencyIcon } from '@/lib/utils';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
+import toast from 'react-hot-toast';
 
 export default function Page() {
   const { id } = useParams();
   const [product, setProduct] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [shop, setShop] = useState({});
   const [imgSrc, setImgSrc] = useState("")
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"))
@@ -18,7 +21,8 @@ export default function Page() {
       const { data, error } = await supabase
         .from("shop")
         .select()
-        .eq("user_id", user.user_id)
+        .eq("user_id", user.user_id);
+      setShop(data[0])
       const { product } = await fetchProductDetails(id, {
         API_KEY: data[0].api_key,
         SHOP_URL: data[0].shop_domain,
@@ -26,9 +30,42 @@ export default function Page() {
       })
       console.log(product)
       setProduct(product)
+      setLoading(false)
     }
     handleGetDetails()
-  }, [])
+  }, []);
+  const handleUpForQuote = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      window.location = "/login"
+      window.localStorage.removeItem("user");
+    }
+    const { data: quoteData, error } = await supabase
+      .from("product_quotes")
+      .insert({
+        amount: product.variants[0].price,
+        dropshipper_id: user.id,
+        product_id: product.id,
+        shop_id: shop.id
+      }).select();
+
+    if (error) {
+      console.error("Error inserting data:", error.message);
+      toast.success("Error While inserting data");
+
+    } else {
+      toast.success("Quote successfully created");
+      console.log("Data inserted successfully:", quoteData);
+    }
+
+    console.log(quoteData, error)
+
+  }
+  if (loading) {
+    return <p>
+      Loading...
+    </p>
+  }
   return (
     <div>
       <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto py-12 px-4 md:px-0">
@@ -80,9 +117,12 @@ export default function Page() {
             )}
 
           </form>
-          <Button>
-            Up for quote
-          </Button>
+          <div onClick={() => handleUpForQuote()}>
+
+            <Button>
+              Up for quote
+            </Button>
+          </div>
         </div>
         <div dangerouslySetInnerHTML={{ __html: product?.body_html }} />
 

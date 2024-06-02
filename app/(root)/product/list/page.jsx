@@ -10,7 +10,8 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import toast from "react-hot-toast";
 export default function ProdctList() {
     const [data, setData] = useState([]);
-    const [shop, setShop] = useState({})
+    const [shop, setShop] = useState({});
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user"))
         async function fetchShopifyData() {
@@ -25,10 +26,16 @@ export default function ProdctList() {
                 PASSWORD: data[0].api_access
             })
             setData(products.products)
+            setLoading(false)
             console.log(products.products)
         }
         fetchShopifyData();
     }, []);
+    if (loading) {
+        return <p>
+            Loading...
+        </p>
+    }
     const handleUpForQuote = async (data) => {
         const { data: { user } } = await supabase.auth.getUser();
 
