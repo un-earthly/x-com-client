@@ -47,13 +47,41 @@ export default function DataTableDemo() {
     setRole(data)
   }, [])
   const handleStatusUpdate = async (status, id) => {
-    console.log(id)
-    const { data: updatedStatus, error } = await supabase.from("invoices")
-      .update({ status }).eq("invoice_number", id).select("status");
-    console.log(error)
-    setStatus(status);
-    setEditState(false);
-    if (!error) {
+    try {
+      console.log(id);
+
+      let table = null;
+      if (role === ROLE_ADMIN) {
+        table = "invoices";
+      } else if (role === ROLE_SUPPLIER) {
+        table = "supplier_invoices";
+      } else if (role === ROLE_USER) {
+        table = "dropshipper_invoices";
+      }
+
+      if (!table) throw new Error("Invalid role");
+
+      // Update the status in the appropriate table
+      const { data: updatedStatus, error } = await supabase
+        .from(table)
+        .update({ status })
+        .eq("invoice_number", id)
+        .select("status");
+
+      if (error) throw error;
+
+      // If not an admin, update the status in the main "invoices" table as well
+      if (role !== ROLE_ADMIN) {
+        await supabase
+          .from("invoices")
+          .update({ status })
+          .eq("invoice_number", id)
+          .select("status");
+      }
+
+      // Update the local state
+      setStatus(status);
+      setEditState(false);
 
       setData(prevData => {
         // Find the index of the row with the matching invoice_id
@@ -66,13 +94,15 @@ export default function DataTableDemo() {
         }
         return prevData;
       });
-      toast.success("Successfully updated status")
+
+      toast.success("Successfully updated status");
+    } catch (error) {
+      toast.error("Error while updating: " + error.message);
     }
-    toast.error("error while updating")
 
-    console.log(data, updatedStatus)
+  };
 
-  }
+
   const handleDeleteInvoice = async (id) => {
     try {
 
@@ -198,7 +228,7 @@ export default function DataTableDemo() {
                   </TableCell>
                   <TableCell
                   >
-                    {d.total_price}
+                    €{d.total_price}
                   </TableCell>
                   <TableCell
                   >

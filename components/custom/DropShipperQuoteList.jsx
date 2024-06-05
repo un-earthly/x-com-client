@@ -10,10 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 
 export default function DropShipperQuoteList() {
     const [quoteData, setQuoteData] = useState([])
-    // const user = JSON.parse(localStorage.getItem("user"))
-
-
-
+    const [loading, setLoading] = useState(true)
     const handleAcceptQuotation = async (quoteId, table) => {
         try {
             const quotesTable = table === 'product' ? 'product_quotes' : 'quotes';
@@ -75,6 +72,9 @@ export default function DropShipperQuoteList() {
         } catch (error) {
             console.error('Error updating data:', error.message);
         }
+        finally {
+            setLoading(false)
+        }
     };
 
     const handleRejectQuotation = async (quoteId, table) => {
@@ -95,6 +95,8 @@ export default function DropShipperQuoteList() {
             console.log('Data updated successfully with status rejected:', data);
         } catch (error) {
             console.error('Error updating data:', error.message);
+        } finally {
+            setLoading(false)
         }
     };
 
@@ -122,6 +124,8 @@ export default function DropShipperQuoteList() {
             setQuoteData(supplier_offer);
         } catch (error) {
             console.error('Error fetching quote data:', error.message);
+        } finally {
+            setLoading(false)
         }
     };
     const fetchProductQuoteData = async () => {
@@ -143,8 +147,13 @@ export default function DropShipperQuoteList() {
             setQuoteData(supplier_offer);
         } catch (error) {
             console.error('Error fetching quote data:', error.message);
+        } finally {
+            setLoading(false)
         }
     };
+    if (loading) {
+        return <p>Loading...</p>
+    }
     return (
         <div>  <Tabs className="w-full" defaultValue="table1">
             <TabsList className="grid w-full grid-cols-2">

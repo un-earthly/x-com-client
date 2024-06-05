@@ -9,18 +9,37 @@ import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
 export default function StoreFront() {
-    const [shopName, setShopName] = useState(''); // State for shop name
-    const [apiKey, setApiKey] = useState(''); // State for API key
-    const [shopUrl, setShopUrl] = useState(''); // State for shop URL
-    const [accessToken, setAccessToken] = useState(''); // State for access token
-   const router = useRouter();
+    const [shopName, setShopName] = useState('');
+    const [apiKey, setApiKey] = useState('');
+    const [shopUrl, setShopUrl] = useState('');
+    const [accessToken, setAccessToken] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const router = useRouter();
+
+    const validateInputs = () => {
+        if (!shopName || !apiKey || !shopUrl || !accessToken) {
+            setError('All fields are required.');
+            return false;
+        }
+        setError('');
+        return true;
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Save storefront information to Supabase
+        if (!validateInputs()) return;
 
-        const { data: { session: { user } }, error } = await supabase.auth.getSession()
+        setLoading(true);
+
+        const { data: { session: { user } }, error: sessionError } = await supabase.auth.getSession()
+        if (sessionError) {
+            console.error('Error getting session:', sessionError.message);
+            setLoading(false);
+            return;
+        }
+
         if (user) {
             const { error } = await supabase.from('shop').insert([
                 {
@@ -31,14 +50,18 @@ export default function StoreFront() {
                     api_access: accessToken
                 },
             ]);
+            setLoading(false);
             if (error) {
                 console.error('Error saving storefront information:', error.message);
+                toast.error("Error saving storefront information.");
             } else {
                 console.log('Storefront information saved successfully.');
-                // Redirect to desired page after storefront information is saved
-                toast.success("Storefront information saved successfully.")
+                toast.success("Storefront information saved successfully.");
                 router.push('/login');
             }
+        } else {
+            setLoading(false);
+            toast.error("No user session found.");
         }
     };
 
@@ -53,6 +76,7 @@ export default function StoreFront() {
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
                     <form onSubmit={handleSubmit} className='space-y-5'>
+                        {error && <p className="text-red-500">{error}</p>}
                         <div className="space-y-2">
                             <Label htmlFor="shop-name">Shop Name</Label>
                             <Input id="shop-name" placeholder="Enter your shop name" value={shopName} onChange={(e) => setShopName(e.target.value)} />
@@ -69,9 +93,10 @@ export default function StoreFront() {
                             <Label htmlFor="access-token">Access Token</Label>
                             <Input id="access-token" placeholder="Enter your access token" value={accessToken} onChange={(e) => setAccessToken(e.target.value)} />
                         </div>
-                        <Button type="submit" className="w-full">Connect</Button>
+                        <Button type="submit" className="w-full" disabled={loading}>
+                            {loading ? "Connecting..." : 'Connect'}
+                        </Button>
                     </form>
-
                 </CardContent>
             </Card>
         </div>

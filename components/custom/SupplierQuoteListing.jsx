@@ -7,9 +7,10 @@ import Link from 'next/link'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 
 export default function SupplierQuoteListing({ history }) {
-    const [quoteData, setQuoteData] = useState([])
-    const [productQuoteData, setProductQuoteData] = useState([])
-    const [user, setUser] = useState("")
+    const [quoteData, setQuoteData] = useState([]);
+    const [productQuoteData, setProductQuoteData] = useState([]);
+    const [user, setUser] = useState("");
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
         setUser(JSON.parse(localStorage.getItem("user")))
         fetchQuoteData();
@@ -41,6 +42,8 @@ export default function SupplierQuoteListing({ history }) {
             setQuoteData(filteredQuotes);
         } catch (error) {
             console.error('Error fetching quote data:', error.message);
+        } finally {
+            setLoading(false)
         }
     };
     const fetchProductQuoteData = async () => {
@@ -71,10 +74,14 @@ export default function SupplierQuoteListing({ history }) {
             setProductQuoteData(filteredQuotes);
         } catch (error) {
             console.error('Error fetching quote data:', error.message);
+        } finally {
+            setLoading(false)
         }
     };
 
-
+    if (loading) {
+        return <p>Loading...</p>
+    }
     return (
         <div>
             <Tabs className="w-full" defaultValue="table1">

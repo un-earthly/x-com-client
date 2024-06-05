@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link"
+import { getCurrencyIcon } from "@/lib/utils"
 
 
 export default function Component() {
@@ -80,8 +81,8 @@ export default function Component() {
             <CardContent>
                 <Tabs className="w-full" defaultValue="table1">
                     <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger onClick={() => getSupplierOrders()} value="table1">Quotes On Order</TabsTrigger>
-                        <TabsTrigger onClick={() => getSupplierOrdersOnProduct()} value="table2">Quotes On Product</TabsTrigger>
+                        <TabsTrigger onClick={() => getSupplierOrders()} value="table1">Order</TabsTrigger>
+                        <TabsTrigger onClick={() => getSupplierOrdersOnProduct()} value="table2">Product Order</TabsTrigger>
                     </TabsList>
                     <TabsContent value="table1"><Table>
                         <TableHeader>
@@ -102,7 +103,7 @@ export default function Component() {
                                 <TableCell>{e?.supplier_id}</TableCell>
                                 <TableCell>{e?.dropshipper_id}</TableCell>
                                 <TableCell>{e?.order_status}</TableCell>
-                                <TableCell>${e?.total_amount}</TableCell>
+                                <TableCell>€{e?.total_amount}</TableCell>
                                 <TableCell>
                                     <Dialog>
                                         <DropdownMenu>
@@ -198,7 +199,7 @@ export default function Component() {
                                     <TableCell>{e?.supplier_id}</TableCell>
                                     <TableCell>{e?.dropshipper_id}</TableCell>
                                     <TableCell>{e?.order_status}</TableCell>
-                                    <TableCell>${e?.total_amount}</TableCell>
+                                    <TableCell>€{e?.total_amount}</TableCell>
                                     <TableCell>
                                         <Dialog>
                                             <DropdownMenu>

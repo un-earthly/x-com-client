@@ -26,7 +26,7 @@ export const columns = [
   },
   {
     accessorKey: "issue_date",
-    header: "Issue Date",
+    header: "Due Date",
   },
   {
     accessorKey: "status",
@@ -43,7 +43,8 @@ export default function UserDashboard() {
   const [hotProducts, setHotProducts] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [cardData, setCardData] = useState([])
-  const [user, setUser] = useState([])
+  const [user, setUser] = useState([]);
+  const [loading, setLoading] = useState(true)
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"))
     setUser(user)
@@ -62,6 +63,9 @@ export default function UserDashboard() {
       } catch (error) {
         console.error('Error fetching dashboard cards data:', error.message);
         throw error;
+      }
+      finally {
+        setLoading(false)
       }
     }
     getDashboardCardsData();
@@ -98,6 +102,9 @@ export default function UserDashboard() {
       } catch (error) {
         console.error("Error fetching data:", error.message);
       }
+      finally {
+        setLoading(false)
+      }
     }
 
     // Call the function to fetch products data
@@ -118,10 +125,17 @@ export default function UserDashboard() {
         console.error('Error fetching dashboard cards data:', error.message);
         throw error;
       }
+      finally {
+        setLoading(false)
+      }
     }
     getInvoiceData()
   }, [])
 
+  if (loading) {
+    return <p>
+      Loading...</p>
+  }
   return (
     <div>
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
@@ -223,10 +237,10 @@ export default function UserDashboard() {
                         {td.invoice_number}
                       </TableCell>
                       <TableCell>
-                        $ {td.invoice_total}
+                        $ {td.total_price}
                       </TableCell>
                       <TableCell>
-                        {td.invoice_date}
+                        {td.due_date}
                       </TableCell>
                       <TableCell className="capitalize">
                         {td.status ? td.status : "Unpaid"}

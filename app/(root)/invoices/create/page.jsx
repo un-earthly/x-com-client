@@ -82,7 +82,7 @@ export default function CreateInvoice() {
         })
         if (sendTo === "dropshipper") {
             const { data, error } = await supabase.from("dropshipper_invoices").insert({
-                invoice_id: invoiceId,
+                invoice_number: invoiceId,
                 dropshipper_id: order.dropshipper_id,
                 status: "unpaid",
                 received_date: new Date()
@@ -91,7 +91,7 @@ export default function CreateInvoice() {
         }
         else if (sendTo === "supplier") {
             const { data, error } = await supabase.from("supplier_invoices").insert({
-                invoice_id: invoiceId,
+                invoice_number: invoiceId,
                 supplier_id: order.supplier_id,
                 status: "unpaid",
                 received_date: new Date()

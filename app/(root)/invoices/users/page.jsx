@@ -24,7 +24,7 @@ export default function SendToUsers() {
     }, [])
     const handleSend = async (user_id) => {
         const { error } = await supabase.from("recieved_invoices").insert({
-            invoice_id: invoiceId,
+            invoice_number: invoiceId,
             user_id
         });
         // console.log(error)

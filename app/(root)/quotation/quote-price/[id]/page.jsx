@@ -12,6 +12,7 @@ import { SelectValue, SelectTrigger, SelectItem, SelectContent, Select } from "@
 
 import { RadioGroupItem, RadioGroup } from "@/components/ui/radio-group"
 import toast from 'react-hot-toast'
+import { ROLE_SUPPLIER } from '@/lib/constant'
 
 export default function QuotePrice() {
     const router = useRouter();
@@ -96,7 +97,7 @@ export default function QuotePrice() {
                     </div>
                 </div>
 
-                <div className="flex flex-col">
+                {user.role === ROLE_SUPPLIER && <div className="flex flex-col">
                     <div className='w-full H-10'>
                         <Image src={require("../../../../../public/supplier-quote.svg")} height={100} width={450} />
                     </div>
@@ -116,7 +117,7 @@ export default function QuotePrice() {
                             </form>
                         </CardContent>
                     </Card>
-                </div>
+                </div>}
             </div>
         </div>
     </section>

@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react'
 import { getCurrencyIcon } from '@/lib/utils'
 import { Label } from '@/components/ui/label'
 import toast from 'react-hot-toast'
+import { ROLE_SUPPLIER } from '@/lib/constant'
 
 export default function QuotePrice() {
     const router = useRouter();
@@ -18,21 +19,47 @@ export default function QuotePrice() {
     const { id } = useParams();
     const [productData, setProducrtData] = useState({});
     const user = JSON.parse(localStorage.getItem("user"));
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(''); // State for error messages
+
+    const validateInputs = (offer, date) => {
+        if (!offer || !date) {
+            setError('All fields are required.');
+            return false;
+        }
+        setError('');
+        return true;
+    };
     const handleSubmit = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
+
+        const offer = e.target.offer.value;
+        const date = e.target.date.value;
+
+        if (!validateInputs(offer, date)) return;
+
+        setLoading(true);
+
         const { data, error } = await supabase.from("supplier_offer_product").insert({
             quote_id,
-            supplier_offer: e.target.offer.value,
-            estimated_delivery: e.target.date.value,
+            supplier_offer: offer,
+            estimated_delivery: date,
             supplier_name: user.user_name,
             supplier_id: user.user_id,
-            shop_id: shop.id
-        }).select()
-        toast.success("Successfuly Offered Price!")
-        router.push("/quotation")
-        console.log(data, error)
+            // shop_id: shop.id
+        }).select();
 
-    }
+        setLoading(false);
+
+        if (error) {
+            console.error('Error offering price:', error.message);
+            toast.error("Error offering price.");
+        } else {
+            toast.success("Successfully offered price!");
+            router.push("/quotation");
+            console.log(data, error);
+        }
+    };
     useEffect(() => {
         // console.log(id)
         (async function () {
@@ -48,8 +75,12 @@ export default function QuotePrice() {
             });
             console.log(product)
             setProducrtData(product)
+            setLoading(false)
         })()
-    }, [])
+    }, []);
+    if (loading) {
+        return <p>Loading...</p>
+    }
     return (<section className="">
         <div className="container px-4 md:px-6">
             <div className="grid items-start gap-6 lg:grid-cols-[1fr_500px] lg:gap-12 xl:grid-cols-[1fr_550px]">
@@ -86,28 +117,30 @@ export default function QuotePrice() {
                     </Card>
 
                 </div>
+                {user.role === ROLE_SUPPLIER &&
+                    <div className="flex flex-col sticky top-4">
+                        <div className='w-full H-10'>
+                            <Image src={require("../../../../../../public/supplier-quote.svg")} height={100} width={450} />
+                        </div>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>
+                                    Offer Your Price
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <form onSubmit={e => handleSubmit(e)} className='flex gap-10 flex-col'>
+                                    <div><Label>Offer Price</Label>
+                                        <Input name="offer" placeholder="Enter Offer" /></div>
+                                    <div><Label>Estimated Delivery</Label>
+                                        <Input name="date" type="date" /></div>
+                                    {error && <p className="text-red-500">{error}</p>}
 
-                <div className="flex flex-col sticky top-4">
-                    <div className='w-full H-10'>
-                        <Image src={require("../../../../../../public/supplier-quote.svg")} height={100} width={450} />
-                    </div>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>
-                                Offer Your Price
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <form onSubmit={e => handleSubmit(e)} className='flex gap-10 flex-col'>
-                                <div><Label>Offer Price</Label>
-                                    <Input name="offer" placeholder="Enter Offer" /></div>
-                                <div><Label>Estimated Delivery</Label>
-                                    <Input name="date" type="date" /></div>
-                                <Button type="submit">Submit</Button>
-                            </form>
-                        </CardContent>
-                    </Card>
-                </div>
+                                    <Button type="submit">Submit</Button>
+                                </form>
+                            </CardContent>
+                        </Card>
+                    </div>}
             </div>
         </div>
     </section>
