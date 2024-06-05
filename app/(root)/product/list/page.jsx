@@ -8,6 +8,7 @@ import Link from "next/link";
 import { MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import toast from "react-hot-toast";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 export default function ProdctList() {
     const [data, setData] = useState([]);
     const [shop, setShop] = useState({});
@@ -62,8 +63,17 @@ export default function ProdctList() {
 
     }
     return (
-        <div>
-            <div className="border rounded-lg w-full p-4">
+        <Card
+            className="sm:col-span-2"
+        >
+            <CardHeader className="pb-3">
+                <CardTitle>Manage Your Products</CardTitle>
+                <CardDescription className="max-w-lg text-balance leading-relaxed">
+                    Introducing Our Dynamic Product Dashboard for Seamless
+                    Management and Insightful Analysis.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -105,8 +115,8 @@ export default function ProdctList() {
 
                     </TableBody>
                 </Table>
-            </div>
-        </div>
+            </CardContent>
+        </Card >
 
     )
 }

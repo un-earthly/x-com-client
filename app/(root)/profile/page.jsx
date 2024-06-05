@@ -4,7 +4,6 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { CardContent, Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { RadioGroup } from "@/components/ui/radio-group"
 import { useEffect, useState } from "react"
 import { supabase } from "@/api"
 import toast from "react-hot-toast"
@@ -18,6 +17,7 @@ export default function Profile() {
   const [apiKey, setApiKey] = useState(''); // State for API key
   const [shopUrl, setShopUrl] = useState(''); // State for shop URL
   const [accessToken, setAccessToken] = useState(''); // State for access token
+  const [avatarUrl, setAvatarUrl] = useState('https://via.placeholder.com/96x96'); // State for avatar URL
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,20 +44,78 @@ export default function Profile() {
       }
     }
   };
-  // Function to handle password reset
-  const handleResetPassword = async () => {
-    try {
-      const { error } = await supabase.auth.api.resetPasswordForEmail(email);
-      if (error) {
-        setErrorMessage(error.message);
-      } else {
-        setSuccessMessage("Password reset email sent successfully.");
+  const handleUpload = async (event) => {
+    let file = event.target.files[0];
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    let { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      console.error('Error uploading avatar:', uploadError.message);
+      return;
+    }
+
+    const { data, error: urlError } = supabase
+      .storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+
+    if (urlError) {
+      console.error('Error getting avatar URL:', urlError.message);
+      return;
+    }
+
+    const publicUrl = data.publicUrl;
+    setAvatarUrl(publicUrl);
+
+    if (publicUrl) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const userId = sessionData?.session?.user?.id;
+
+      if (userId) {
+        const { error: updateError } = await supabase
+          .from('user')
+          .update({ avatar: publicUrl })
+          .eq('user_id', userId);
+        toast.success("Updated Avatar")
+        if (updateError) {
+          toast.success("Error updating user avatar")
+          console.error('Error updating user avatar:', updateError.message);
+        }
       }
-    } catch (error) {
-      console.error("Error resetting password:", error.message);
-      setErrorMessage("An error occurred while resetting the password.");
     }
   };
+  const handleSaveProfile = async () => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const userId = sessionData?.session?.user?.id;
+
+    if (userId) {
+      const updates = {
+        user_name: profileData.user_name,
+        user_email: profileData.user_email,
+        avatar: avatarUrl,
+        bio: profileData.bio
+      };
+
+      const { error: updateError } = await supabase
+        .from('user')
+        .update(updates)
+        .eq('user_id', userId);
+
+      if (updateError) {
+        console.error('Error updating profile:', updateError.message);
+        toast.error(updateError.message);
+      } else {
+        toast.success("Profile updated successfully.");
+
+      }
+    }
+  };
+
   useEffect(() => {
 
     async function handleProfileDataFetch() {
@@ -77,39 +135,39 @@ export default function Profile() {
     }
     handleProfileDataFetch()
   }, [])
+
   return (
     <div className="p-10">
       <div className="px-4 space-y-6 sm:px-6">
-        <header className="space-y-2">
-
-          <div className="flex items-center space-x-3">
-            <img
-              alt="Avatar"
-              className="rounded-full"
-              height="96"
-              src="https://via.placeholder.com/96x96"
-              style={{
-                aspectRatio: "96/96",
-                objectFit: "cover",
-              }}
-              width="96"
-            />
-            <div className="space-y-1">
-              <h1 className="text-2xl font-bold">{profileData?.user_name}</h1>
-              <Button size="sm">Change photo</Button>
-            </div>
-          </div>
-        </header>
         <div className="space-y-8">
           <Card>
+            <CardHeader>
+              <div className="flex items-center space-x-3">
+                <img
+                  alt="Avatar"
+                  className="rounded-full"
+                  height="96"
+                  src={profileData.avatar || avatarUrl}
+                  style={{
+                    aspectRatio: "96/96",
+                    objectFit: "cover",
+                  }}
+                  width="96"
+                />
+                <div className="space-y-1">
+                  <h1 className="text-2xl font-bold">{profileData?.user_name}</h1>
+                  <Input type="file" onChange={handleUpload} />
+                </div>
+              </div>
+            </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
-                <Input defaultValue="Meadow Richardson" id="name" value={profileData?.user_name} placeholder="E.g. Jane Doe" />
+                <Input defaultValue="Meadow Richardson" id="name" onChange={(e) => setProfileData({ ...profileData, user_name: e.target.value })} value={profileData?.user_name} placeholder="E.g. Jane Doe" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input value={profileData?.user_email} id="email" placeholder="E.g. jane@example.com" />
+                <Input value={profileData?.user_email} onChange={(e) => setProfileData({ ...profileData, user_email: e.target.value })} id="email" placeholder="E.g. jane@example.com" />
               </div>
               <div className="space-y-2">
                 <Label>Biography</Label>
@@ -117,13 +175,15 @@ export default function Profile() {
                   className="mt-1"
                   id="bio"
                   placeholder="Enter your bio"
+                  onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                  value={profileData.bio}
                   style={{
                     minHeight: "100px",
                   }}
                 />
               </div>
               <div className="pt-6">
-                <Button>Save</Button>
+                <Button onClick={() => handleSaveProfile()}>Save</Button>
               </div>
             </CardContent>
             <CardHeader>

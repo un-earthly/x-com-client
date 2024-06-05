@@ -104,81 +104,76 @@ export default function Orders() {
         </p>
     }
     return (
-        <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
-            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-                <Card
-                    className="sm:col-span-2" x-chunk="dashboard-05-chunk-0"
-                >
-                    <CardHeader className="pb-3">
-                        <CardTitle>Your Orders</CardTitle>
-                        <CardDescription className="max-w-lg text-balance leading-relaxed">
-                            Introducing Our Dynamic Orders Dashboard for Seamless
-                            Management and Insightful Analysis.
-                        </CardDescription>
-                    </CardHeader>
+        <Card
+            className="sm:col-span-2"
+        >
+            <CardHeader className="pb-3">
+                <CardTitle>Your Orders</CardTitle>
+                <CardDescription className="max-w-lg text-balance leading-relaxed">
+                    Introducing Our Dynamic Orders Dashboard for Seamless
+                    Management and Insightful Analysis.
+                </CardDescription>
+            </CardHeader>
 
-                </Card>
-
-            </div>
-            <div className="rounded-md border">
-                {user.role === "supplier" ? null : loading ? (
-                    <div className="flex justify-center items-center h-24">
-                        <p>Loading...</p>
-                    </div>
-                ) : (
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-[100px]">Order Id</TableHead>
-                                <TableHead>Ordered by</TableHead>
-                                <TableHead>Contact</TableHead>
-                                <TableHead>Payment Status</TableHead>
-                                <TableHead>Amount</TableHead>
-                                <TableHead className="text-right"></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {data?.length > 0 ? data.map((d) => (
-                                <TableRow key={d?.id}>
-                                    <TableCell className="font-medium">#{d?.order_number}</TableCell>
-                                    <TableCell>{d?.customer?.first_name} {" "}{d?.customer?.last_name}</TableCell>
-                                    <TableCell>{d?.phone || d?.email}</TableCell>
-                                    <TableCell>{d?.financial_status}</TableCell>
-                                    <TableCell>{getCurrencyIcon("EUR")}{d?.total_price}</TableCell>
-                                    <TableCell className="text-right">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                                    <span className="sr-only">Open menu</span>
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem><Link href={`/order/${d?.id}`}>View Details</Link></DropdownMenuItem>
-                                                <DropdownMenuItem>
-                                                    <div onClick={() => handleUpForQuote(d.id, d.order_number, d.total_price)}>Up For Quote</div>
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
-                                </TableRow>
-                            )) : (
+            <CardContent>
+                <div className="rounded-md">
+                    {user.role === "supplier" ? null : loading ? (
+                        <div className="flex justify-center items-center h-24">
+                            <p>Loading...</p>
+                        </div>
+                    ) : (
+                        <Table>
+                            <TableHeader>
                                 <TableRow>
-                                    <TableCell colSpan={5} className="h-24 text-center">
-                                        No results.
-                                    </TableCell>
+                                    <TableHead className="w-[100px]">Order Id</TableHead>
+                                    <TableHead>Ordered by</TableHead>
+                                    <TableHead>Contact</TableHead>
+                                    <TableHead>Payment Status</TableHead>
+                                    <TableHead>Amount</TableHead>
+                                    <TableHead className="text-right"></TableHead>
                                 </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                )}
+                            </TableHeader>
+                            <TableBody>
+                                {data?.length > 0 ? data.map((d) => (
+                                    <TableRow key={d?.id}>
+                                        <TableCell className="font-medium">#{d?.order_number}</TableCell>
+                                        <TableCell>{d?.customer?.first_name} {" "}{d?.customer?.last_name}</TableCell>
+                                        <TableCell>{d?.phone || d?.email}</TableCell>
+                                        <TableCell>{d?.financial_status}</TableCell>
+                                        <TableCell>{getCurrencyIcon("EUR")}{d?.total_price}</TableCell>
+                                        <TableCell className="text-right">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                                        <span className="sr-only">Open menu</span>
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem><Link href={`/order/${d?.id}`}>View Details</Link></DropdownMenuItem>
+                                                    <DropdownMenuItem>
+                                                        <div onClick={() => handleUpForQuote(d.id, d.order_number, d.total_price)}>Up For Quote</div>
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="h-24 text-center">
+                                            No results.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    )}
 
-
-
-            </div>
-        </div>
+                </div>
+            </CardContent>
+        </Card>
 
     )
 }

@@ -213,15 +213,9 @@ export default function TicketList() {
                                                     </Link>
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem>
-                                                    <Link href={`ticket/${d.id}/edit`} className="flex">
-                                                        <Edit size={16} className="me-3" />Edit
-                                                    </Link>
-
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem>
 
                                                     <DialogTrigger asChild>
-                                                        <span className="flex" onClick={() => handleDelete(d.id)}><Trash size={16} className="me-3" />Delete</span>
+                                                        <span className="flex"><Trash size={16} className="me-3" />Delete</span>
                                                     </DialogTrigger>
 
 
@@ -230,15 +224,20 @@ export default function TicketList() {
                                         </DropdownMenu>
                                         <DialogContent className="sm:max-w-[425px]">
                                             <DialogHeader>
-                                                <DialogTitle>Edit profile</DialogTitle>
+                                                <DialogTitle>Delete Ticket</DialogTitle>
                                                 <DialogDescription>
-                                                    Make changes to your profile here. Click save when you&apos;re done.
+                                                    Are you sure that you want to delete the ticket?
                                                 </DialogDescription>
                                             </DialogHeader>
 
                                             <DialogFooter>
-                                                <Button variant="outline" >Cancel</Button>
-                                                <Button variant="destructive" >Save changes</Button>
+
+                                                <DialogTrigger asChild>
+                                                    <Button variant="outline">
+                                                        <span className="flex">Cancel</span>
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <Button variant="destructive" onClick={() => handleDelete(d.id)} >Delete</Button>
                                             </DialogFooter>
                                         </DialogContent>
                                     </Dialog>
