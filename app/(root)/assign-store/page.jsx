@@ -3,7 +3,7 @@ import { supabase } from "@/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DropdownMenuTrigger, DropdownMenuItem, DropdownMenuContent, DropdownMenu } from "@/components/ui/dropdown-menu"
-import { ROLE_SUPPLIER, ROLE_USER } from "@/lib/constant"
+import { ROLE_SUPPLIER } from "@/lib/constant"
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
 
@@ -52,7 +52,6 @@ export default function AssignStore() {
                     {shops?.length > 0 ? shops?.map(sd => <div key={sd?.shop_name} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
                         <div className="p-6">
                             <h2 className="text-xl font-bold mb-2 capitalize">{sd?.shop_name}</h2>
-                            {/* <p className="text-gray-500 dark:text-gray-400 mb-4">Wholesale supplier of office and cleaning supplies.</p> */}
                             <div className="flex justify-end">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
