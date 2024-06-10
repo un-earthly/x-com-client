@@ -5,45 +5,67 @@ import { Button } from '../ui/button'
 import { fetchOrderDetails, supabase } from '@/api'
 import Link from 'next/link'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
+import { Badge } from '../ui/badge'
 
-export default function AdminQuoteListing() {
+export default function AdminQuoteListing({ history }) {
     const [quoteData, setQuoteData] = useState([])
     const [productQuoteData, setProductQuoteData] = useState([])
-    const [user, setUser] = useState("")
+    const [user, setUser] = useState("");
+    const [loading, setLoading] = useState(true);
+
     useEffect(() => {
         setUser(JSON.parse(localStorage.getItem("user")))
         fetchQuoteData();
     }, []);
     const fetchQuoteData = async () => {
         try {
-            // Fetch quotes data
-            const { data, error } = await supabase.from('quotes')
-                .select(`*,user(*),shop(*)`);
-            if (error) {
-                throw error;
-            }
+            const { data, error } = await supabase.from('quotes').select(`*,user(*),shop(*)`);
+            if (error) throw error;
 
-            setQuoteData(data);
+            if (history) {
+                setQuoteData(data);
+            } else {
+                const { data: existingOffers, error: existingOffersError } = await supabase
+                    .from('supplier_offer').select('quote_id');
+                if (existingOffersError) throw existingOffersError;
+
+                const existingQuoteIds = existingOffers.map(offer => offer.quote_id);
+                const filteredQuotes = data.filter(quote => !existingQuoteIds.includes(quote.quote_id));
+                setQuoteData(filteredQuotes);
+            }
         } catch (error) {
             console.error('Error fetching quote data:', error.message);
+        } finally {
+            setLoading(false);
         }
     };
+
     const fetchProductQuoteData = async () => {
         try {
-            // Fetch quotes data
-            const { data, error } = await supabase.from('product_quotes')
-                .select(`*,user(*),shop(*)`);
-            console.log(data)
-            if (error) {
-                throw error;
+            const { data, error } = await supabase.from('product_quotes').select(`*,user(*),shop(*)`);
+            if (error) throw error;
+
+            if (history) {
+                setProductQuoteData(data);
+            } else {
+                const { data: existingOffers, error: existingOffersError } = await supabase
+                    .from('supplier_offer_product').select('quote_id');
+                if (existingOffersError) throw existingOffersError;
+
+                const existingQuoteIds = existingOffers.map(offer => offer.quote_id);
+                const filteredQuotes = data.filter(quote => !existingQuoteIds.includes(quote.quote_id));
+                setProductQuoteData(filteredQuotes);
             }
-
-
-            setProductQuoteData(data);
         } catch (error) {
-            console.error('Error fetching quote data:', error.message);
+            console.error('Error fetching product quote data:', error.message);
+        } finally {
+            setLoading(false);
         }
     };
+
+    if (loading) {
+        return <p>Loading...</p>;
+    }
 
 
     return (
@@ -71,7 +93,8 @@ export default function AdminQuoteListing() {
                                 <TableCell>#{d?.order_number}</TableCell>
                                 <TableCell>${d?.amount}</TableCell>
                                 <TableCell>{d?.shop?.shop_name}</TableCell>
-                                <TableCell>{d?.status}</TableCell>
+                                <TableCell><Badge>{d?.status === 'up_for_quote' ? 'Open For Quotation' : d?.status}</Badge></TableCell>
+
 
                                 <TableCell>
                                     <div className="flex items-center justify-center">
@@ -110,7 +133,7 @@ export default function AdminQuoteListing() {
                                 <TableCell>#{d?.product_id}</TableCell>
                                 <TableCell>${d?.amount}</TableCell>
                                 <TableCell>{d?.shop?.shop_name}</TableCell>
-                                <TableCell>{d?.status}</TableCell>
+                                <TableCell><Badge>{d?.status === 'up_for_quote' ? 'Open For Quotation' : d?.status}</Badge></TableCell>
 
                                 <TableCell>
                                     <div className="flex items-center justify-center">

@@ -46,7 +46,7 @@ export default function SupplierDashboard() {
     // More data entries
   ];
   return (
-    <div>
+    <div className='space-y-5'>
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
         <Card x-chunk="dashboard-01-chunk-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -90,7 +90,7 @@ export default function SupplierDashboard() {
         </Card>
       </div>
 
-     
+
       <Card>
         <CardHeader>
           <CardTitle>Return Ratio</CardTitle>

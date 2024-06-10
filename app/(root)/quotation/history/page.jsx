@@ -32,7 +32,7 @@ export default function PreviousQuotation() {
 
                     {
                         user.role === ROLE_SUPPLIER ? <SupplierQuoteListing history={true} /> :
-                            user.role === ROLE_ADMIN ? <AdminQuoteListing /> : <DropShipperQuoteList history={true} />
+                            user.role === ROLE_ADMIN ? <AdminQuoteListing history={true} /> : <DropShipperQuoteList history={true} />
                     }
                 </CardContent>
             </Card>

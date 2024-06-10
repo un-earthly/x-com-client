@@ -13,10 +13,16 @@ export default function Profile() {
   const [email, setEmail] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [shopName, setShopName] = useState(''); // State for shop name
-  const [apiKey, setApiKey] = useState(''); // State for API key
-  const [shopUrl, setShopUrl] = useState(''); // State for shop URL
-  const [accessToken, setAccessToken] = useState(''); // State for access token
+  // const [shopName, setShopName] = useState(''); // State for shop name
+  // const [apiKey, setApiKey] = useState(''); // State for API key
+  // const [shopUrl, setShopUrl] = useState(''); // State for shop URL
+  // const [accessToken, setAccessToken] = useState(''); // State for access token
+  const [shopData, setShopData] = useState({
+    shop_name: '',
+    api_key: '',
+    shop_domain: '',
+    api_access: ''
+  })
   const [avatarUrl, setAvatarUrl] = useState('https://via.placeholder.com/96x96'); // State for avatar URL
 
   const handleSubmit = async (e) => {
@@ -29,10 +35,10 @@ export default function Profile() {
       const { error } = await supabase.from('shop').insert([
         {
           user_id: user.id,
-          shop_name: shopName,
-          api_key: apiKey,
-          shop_domain: shopUrl,
-          api_access: accessToken
+          shop_name: shopData.shop_name,
+          api_key: shopData.api_key,
+          shop_domain: shopData.shop_domain,
+          api_access: shopData.api_access
         },
       ]);
       if (error) {
@@ -132,6 +138,9 @@ export default function Profile() {
         .eq('user_id', session.user.id);
       console.log(data[0])
       setProfileData(data[0])
+
+      const { data: shopData } = await supabase.from('shop').select().eq("user_id", session.user.id)
+      setShopData(shopData[0])
     }
     handleProfileDataFetch()
   }, [])
@@ -195,19 +204,28 @@ export default function Profile() {
               <form onSubmit={handleSubmit} className='space-y-5'>
                 <div className="space-y-2">
                   <Label htmlFor="shop-name">Shop Name</Label>
-                  <Input id="shop-name" placeholder="Enter your shop name" value={shopName} onChange={(e) => setShopName(e.target.value)} />
+                  <Input id="shop-name" placeholder="Enter your shop name" value={shopData?.shop_name}
+                    onChange={(e) => setShopData({ ...shopData, shop_name: e.target.value })}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="api-key">API Key</Label>
-                  <Input id="api-key" placeholder="Enter your API key" value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
+                  <Input id="api-key" placeholder="Enter your API key" value={shopData?.api_key}
+                    onChange={(e) => setShopData({ ...shopData, api_key: e.target.value })}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="shop-url">Shop URL</Label>
-                  <Input id="shop-url" placeholder="Enter your shop URL" value={shopUrl} onChange={(e) => setShopUrl(e.target.value)} />
+                  <Input id="shop-url" placeholder="Enter your shop URL"
+                    value={shopData?.shop_domain}
+                    onChange={(e) => setShopData({ ...shopData, shop_domain: e.target.value })}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="access-token">Access Token</Label>
-                  <Input id="access-token" placeholder="Enter your access token" value={accessToken} onChange={(e) => setAccessToken(e.target.value)} />
+                  <Input id="access-token"
+                    onChange={(e) => setShopData({ ...shopData, api_access: e.target.value })}
+                    placeholder="Enter your access token" value={shopData?.api_access} />
                 </div>
                 <Button type="submit" >Connect</Button>
               </form>

@@ -8,7 +8,7 @@ import { supabase } from '@/api'
 import toast from 'react-hot-toast'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 
-export default function DropShipperQuoteList() {
+export default function DropShipperQuoteList({history}) {
     const [quoteData, setQuoteData] = useState([])
     const [loading, setLoading] = useState(true)
     const handleAcceptQuotation = async (quoteId, table) => {
