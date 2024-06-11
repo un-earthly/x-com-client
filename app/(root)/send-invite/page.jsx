@@ -23,20 +23,12 @@ export default function SendInvitations() {
     };
 
     return (
-        <Card className="w-full max-w-3xl">
+        <Card className="w-full ">
             <CardHeader>
                 <CardTitle>Send email invitations</CardTitle>
                 <CardDescription>Personalize your email invitations before sending them.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                {/* <div className="space-y-2">
-                    <Label htmlFor="subject">Subject</Label>
-                    <Input id="subject" placeholder="Enter the email subject" value={subject} onChange={(e) => setSubject(e.target.value)} />
-                </div> */}
-                {/* <div className="space-y-2">
-                    <Label htmlFor="message">Message</Label>
-                    <Textarea className="min-h-[100px]" id="message" placeholder="Enter your message" value={message} onChange={(e) => setMessage(e.target.value)} />
-                </div> */}
                 <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <Input id="email" placeholder="Enter supplier email address" type="email" value={emails} onChange={(e) => setEmails(e.target.value)} />

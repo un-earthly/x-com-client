@@ -16,6 +16,7 @@ export default function AdminDashboard() {
     const [ticketData, setData] = useState([])
     const [dashboardCards, setDashboardCards] = useState([]);
     useEffect(() => {
+        const user = JSON.parse(localStorage.getItem('user'));
         (async () => {
             try {
                 let { data, error } = await supabase
@@ -25,14 +26,16 @@ export default function AdminDashboard() {
 
                 if (error) {
                     throw error;
-                } let { data: userData, error: userError } = await supabase
+                }
+                let { data: userData, error: userError } = await supabase
                     .from("user")
                     .select()
                     .eq("role", ROLE_USER);
 
                 if (userError) {
                     throw userError;
-                } let { data: supplierData, error: supplierError } = await supabase
+                }
+                let { data: supplierData, error: supplierError } = await supabase
                     .from("user")
                     .select()
                     .eq("role", ROLE_SUPPLIER);
@@ -40,11 +43,18 @@ export default function AdminDashboard() {
                 if (supplierError) {
                     throw supplierError;
                 }
+                let { data: orderData, error: orderError } = await supabase
+                    .from("supplier_order")
+                    .select()
+
+                if (orderError) {
+                    throw orderError;
+                }
                 setData(data);
                 setDashboardCards([...dashboardCards, {
                     header: "Recent Orders",
-                    value: data.length,
-                    message: data.length + "new tickets to resolve",
+                    value: orderData.length,
+                    message: orderData.length + "new tickets to resolve",
                     icon: <ShoppingBag />
                 }, {
                     header: "Total Dropshippers",
@@ -128,7 +138,7 @@ export default function AdminDashboard() {
     return (
         <div className='space-y-5'>
             <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-                {dashboardCards?.map(e => <Card x-chunk="dashboard-01-chunk-0">
+                {dashboardCards?.map(e => <Card key={e.id} x-chunk="dashboard-01-chunk-0">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">{e.header}</CardTitle>
                         {e.icon}

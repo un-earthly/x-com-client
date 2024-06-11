@@ -14,10 +14,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link"
 import { getCurrencyIcon } from "@/lib/utils"
+import { ROLE_SUPPLIER } from "@/lib/constant"
 
 
 export default function Component() {
-    const [data, setData] = useState([]);
+    const [orderData, setOrderData] = useState([]);
+    const [productOrderData, setProductOrderData] = useState([]);
     const [trackingNumber, setTrackingNumber] = useState('');
     const [carrier, setCarrier] = useState('');
     const [notes, setNotes] = useState('');
@@ -27,24 +29,23 @@ export default function Component() {
 
     };
 
-    // const user = JSON.parse(localStorage.getItem("user"))
+    const user = JSON.parse(localStorage.getItem("user"))
     useEffect(() => {
-        // Function to fetch data from the supplier_order table
-
         getSupplierOrders()
     }, [])
     async function getSupplierOrders() {
         try {
-            // Query the supplier_order table
-            const { data, error } = await supabase
-                .from('supplier_order')
-                .select();
+            let query = supabase.from('supplier_order').select();
+            if (user.role === ROLE_SUPPLIER) {
+                query = query.eq("supplier_id", user.user_id);
+            }
+            const { data, error } = await query;
 
             if (error) {
                 throw error;
             }
-            console.log(data)
-            setData(data);
+            console.log(data);
+            setOrderData(data);
         } catch (error) {
             console.error('Error fetching supplier orders:', error.message);
             return null;
@@ -52,17 +53,19 @@ export default function Component() {
     }
     async function getSupplierOrdersOnProduct() {
         try {
-            // Query the supplier_order table
-            const { data, error } = await supabase
-                .from('supplier_order_product')
-                .select();
+            let query = supabase.from('supplier_order_product').select();
+            if (user.role === ROLE_SUPPLIER) {
+                query = query.eq("supplier_id", user.user_id);
+            }
+            const { data, error } = await query;
 
             if (error) {
                 throw error;
             }
-            console.log(data)
-            setData(data);
-        } catch (error) {
+            console.log(data);
+            setProductOrderData(data);
+        }
+        catch (error) {
             console.error('Error fetching supplier orders:', error.message);
             return null;
         }
@@ -97,7 +100,7 @@ export default function Component() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {data.length > 0 ? data.map(e => <TableRow key={e.order_id}>
+                            {orderData.length > 0 ? orderData.map(e => <TableRow key={e.order_id}>
                                 <TableCell>{e.order_id}</TableCell>
                                 <TableCell>#{e?.order_number}</TableCell>
                                 <TableCell>{e?.supplier_id}</TableCell>
@@ -193,7 +196,7 @@ export default function Component() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {data.length > 0 ? data.map(e => <TableRow key={e.id}>
+                                {productOrderData.length > 0 ? productOrderData.map(e => <TableRow key={e.id}>
                                     <TableCell>{e?.id}</TableCell>
                                     <TableCell>{e?.product_id}</TableCell>
                                     <TableCell>{e?.supplier_id}</TableCell>
