@@ -15,6 +15,7 @@ import { ROLE_SUPPLIER, ROLE_USER } from '@/lib/constant'
 export default function AdminDashboard() {
     const [ticketData, setData] = useState([])
     const [dashboardCards, setDashboardCards] = useState([]);
+    const [loading, setLoading] = useState(true)
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem('user'));
         (async () => {
@@ -77,6 +78,9 @@ export default function AdminDashboard() {
             } catch (err) {
                 console.log(err);
             }
+            finally {
+                setLoading(false)
+            }
         })();
 
     }, [])
@@ -134,7 +138,9 @@ export default function AdminDashboard() {
             </div>,
         },
     ]
-
+    if (loading) {
+        return <p>Loading...</p>
+    }
     return (
         <div className='space-y-5'>
             <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">

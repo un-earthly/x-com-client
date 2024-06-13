@@ -41,7 +41,7 @@ export default function Dashboard() {
                 ) : userRole === ROLE_SUPPLIER ? (
                     <SupplierDashboard />
                 ) : (
-                    <Loading progress={100} />
+                    <p>Loading...</p>
                 )}
             </>
         </div>

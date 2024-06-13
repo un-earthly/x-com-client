@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { ResponsiveBar } from '@nivo/bar'
-import { Eye } from 'lucide-react'
+import { Eye, ShoppingBag, Ticket, User, UserCog } from 'lucide-react'
 import Link from 'next/link'
 import {
   Table,
@@ -46,41 +46,31 @@ export default function UserDashboard() {
   const [user, setUser] = useState([]);
   const [loading, setLoading] = useState(true)
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"))
-    setUser(user)
+    const parsedUser = JSON.parse(localStorage.getItem("user"))
+    setUser(parsedUser)
 
     async function getDashboardCardsData() {
+      setLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('dashboard_cards')
-          .select();
-
-        if (error) {
-          throw error;
-        }
-
-        setCardData(data)
-      } catch (error) {
-        console.error('Error fetching dashboard cards data:', error.message);
-        throw error;
-      }
-      finally {
-        setLoading(false)
-      }
-    }
-    getDashboardCardsData();
-    async function getProductsData() {
-      try {
-        const { data, error } = await supabase
-          .from("shop")
+        // Fetch shop data
+        const { data: shopData, error: shopError } = await supabase
+          .from('shop')
           .select()
-          .eq("user_id", user.user_id)
-        const { orders } = await fetchOrders({
-          API_KEY: data[0].api_key,
-          SHOP_URL: data[0].shop_domain,
-          PASSWORD: data[0].api_access
-        });
+          .eq("user_id", parsedUser.user_id);
 
+        if (shopError) {
+          throw new Error(`Failed to fetch shop data: ${shopError.message}`);
+        }
+        if (!shopData.length) {
+          throw new Error("No shop data found for the user.");
+        }
+        console.log(shopData)
+        // Fetch orders
+        const { orders } = await fetchOrders({
+          API_KEY: shopData[0].api_key,
+          SHOP_URL: shopData[0].shop_domain,
+          PASSWORD: shopData[0].api_access
+        });
         const productsArray = [];
         orders.forEach(order => {
           order.line_items.forEach(lineItem => {
@@ -96,20 +86,73 @@ export default function UserDashboard() {
           });
         });
 
-        console.log(productsArray)
         setHotProducts(productsArray);
 
+        // Fetch shop supplier data
+        const { data: shopSupplierData, error: shopSupplierError } = await supabase
+          .from('assigned_shop')
+          .select()
+          .eq("shop_id", shopData[0].id);
+
+        if (shopSupplierError) {
+          throw new Error(`Failed to fetch shop supplier data: ${shopSupplierError.message}`);
+        }
+
+        // Fetch order quote data
+        const { data: orderQuoteData, error: orderQuoteError } = await supabase
+          .from('quotes')
+          .select()
+          .eq("shop_id", shopData[0].id);
+
+        if (orderQuoteError) {
+          throw new Error(`Failed to fetch order quote data: ${orderQuoteError.message}`);
+        }
+
+        // Fetch product quote data
+        const { data: productQuoteData, error: productQuoteError } = await supabase
+          .from('product_quotes')
+          .select()
+          .eq("shop_id", shopData[0].id);
+
+        if (productQuoteError) {
+          throw new Error(`Failed to fetch product quote data: ${productQuoteError.message}`);
+        }
+
+        console.log(productQuoteData);
+
+        // Set card data
+        setCardData([
+          {
+            header: "Recent Orders",
+            value: orders.length,
+            message: `${orders.length} new orders to review`,
+            icon: <ShoppingBag />
+          },
+          {
+            header: "Total Suppliers",
+            value: shopSupplierData.length,
+            message: `${shopSupplierData.length} suppliers available`,
+            icon: <UserCog />
+          },
+          {
+            header: "Total Order Quotes",
+            value: orderQuoteData.length,
+            message: `${orderQuoteData.length} order quotes available`,
+            icon: <User />
+          },
+          {
+            header: "Total Product Quotes",
+            value: productQuoteData.length,
+            message: `${productQuoteData.length} product quotes available`,
+            icon: <Ticket />
+          },
+        ]);
       } catch (error) {
-        console.error("Error fetching data:", error.message);
-      }
-      finally {
-        setLoading(false)
+        console.error('Error fetching dashboard cards data:', error.message);
       }
     }
 
-    // Call the function to fetch products data
-    getProductsData();
-
+    getDashboardCardsData();
     async function getInvoiceData() {
       try {
         const { data, error } = await supabase
@@ -121,12 +164,13 @@ export default function UserDashboard() {
         }
         console.log(data)
         setInvoices(data)
+        setLoading(false)
+
       } catch (error) {
         console.error('Error fetching dashboard cards data:', error.message);
-        throw error;
-      }
-      finally {
         setLoading(false)
+        throw error;
+
       }
     }
     getInvoiceData()
@@ -134,22 +178,23 @@ export default function UserDashboard() {
 
   if (loading) {
     return <p>
-      Loading...</p>
+      Loading...
+    </p>
   }
   return (
     <div className='space-y-5'>
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-        {cardData?.map(d => <Card key={d.card_id} x-chunk="dashboard-01-chunk-0">
+        {cardData?.map(e => <Card key={e.id} x-chunk="dashboard-01-chunk-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{d.name}</CardTitle>
-            {d.icon && <div dangerouslySetInnerHTML={{ __html: d.icon }} />}
-
+            <CardTitle className="text-sm font-medium">{e.header}</CardTitle>
+            {e.icon}
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{d.value}</div>
-            <p className="text-xs text-muted-foreground">{d.description}</p>
+            <div className="text-2xl font-bold">{e.value}</div>
+            <p className="text-xs text-muted-foreground">{e.message}</p>
           </CardContent>
-        </Card>)}
+        </Card>)
+        }
 
       </div>
       <Card>

@@ -12,8 +12,6 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import Link from "next/link"
-import { getCurrencyIcon } from "@/lib/utils"
 import { ROLE_SUPPLIER } from "@/lib/constant"
 
 
@@ -23,14 +21,13 @@ export default function Component() {
     const [trackingNumber, setTrackingNumber] = useState('');
     const [carrier, setCarrier] = useState('');
     const [notes, setNotes] = useState('');
+    const [user, setUser] = useState({});
+    const [loading, setLoading] = useState(true)
     const handleTrackShipment = (e) => {
         e.preventDefault();
-
-
     };
-
-    const user = JSON.parse(localStorage.getItem("user"))
     useEffect(() => {
+        setUser(JSON.parse(localStorage.getItem("user")))
         getSupplierOrders()
     }, [])
     async function getSupplierOrders() {
@@ -46,9 +43,13 @@ export default function Component() {
             }
             console.log(data);
             setOrderData(data);
+
         } catch (error) {
             console.error('Error fetching supplier orders:', error.message);
             return null;
+        }
+        finally {
+            setLoading(false)
         }
     }
     async function getSupplierOrdersOnProduct() {
@@ -69,10 +70,16 @@ export default function Component() {
             console.error('Error fetching supplier orders:', error.message);
             return null;
         }
+        finally {
+            setLoading(false)
+        }
     }
     async function handleFullfilment(id) {
         const order = await markAsFullfilled(id)
         console.log(order)
+    }
+    if (loading) {
+        return <p>Loading...</p>;
     }
 
     return (
@@ -117,7 +124,6 @@ export default function Component() {
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
-                                                {/* <DropdownMenuItem>View Details</DropdownMenuItem> */}
                                                 <DropdownMenuItem>Mark As Paid</DropdownMenuItem>
                                                 <DialogTrigger asChild>
                                                     <DropdownMenuItem><div onClick={() => handleFullfilment(e.order_id)}>Mark As Fullfilled</div></DropdownMenuItem>
@@ -213,7 +219,6 @@ export default function Component() {
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    {/* <DropdownMenuItem><Link href={`supplier-order/${e.id}`}>View Details</Link></DropdownMenuItem> */}
                                                     <DropdownMenuItem>Mark As Paid</DropdownMenuItem>
                                                     <DialogTrigger asChild>
                                                         <DropdownMenuItem><div onClick={() => handleFullfilment(e.order_id)}>Mark As Fullfilled</div></DropdownMenuItem>
